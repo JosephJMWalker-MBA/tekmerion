@@ -30,7 +30,7 @@ Create enough product and architecture clarity that the first vertical slice can
 - [x] Choose Flutter package/application identifier (`com.aerialsoft.tekmerion`)
 - [ ] Choose license
 - [ ] Create initial issue labels and milestones
-- [ ] Confirm minimum supported Android version
+- [x] Confirm minimum supported Android version (API 24 / Android 7.0)
 - [ ] Select sample leases for parser fixtures
 
 ### Exit criteria
