@@ -27,7 +27,7 @@ Create enough product and architecture clarity that the first vertical slice can
 - [ ] Define export manifest schema
 - [ ] Define parser-stage artifact schema
 - [ ] Define finalized-record correction behavior in testable terms
-- [ ] Choose Flutter package/application identifier
+- [x] Choose Flutter package/application identifier (`com.aerialsoft.tekmerion`)
 - [ ] Choose license
 - [ ] Create initial issue labels and milestones
 - [ ] Confirm minimum supported Android version
