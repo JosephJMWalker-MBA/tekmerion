@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tekmerion/src/features/agreement/domain/agreement.dart';
+import 'package:tekmerion/src/features/agreement/domain/agreement_version.dart';
+import 'package:tekmerion/src/features/obligation/domain/obligation_repository.dart';
+import 'package:tekmerion/src/features/obligation/presentation/obligation_confirmation_screen.dart';
 import 'package:uuid/uuid.dart';
+
 import '../domain/clause.dart';
 import '../domain/clause_repository.dart';
 
@@ -15,16 +20,20 @@ enum ClauseUiState {
 class ManualClauseScreen extends StatefulWidget {
   const ManualClauseScreen({
     super.key,
-    required this.agreementVersionId,
+    required this.agreement,
+    required this.version,
     required this.pageStart,
     required this.pageEnd,
     required this.repository,
+    required this.obligationRepository,
   });
 
-  final String agreementVersionId;
+  final Agreement agreement;
+  final AgreementVersion version;
   final int pageStart;
   final int pageEnd;
   final ClauseRepository repository;
+  final ObligationRepository obligationRepository;
 
   @override
   State<ManualClauseScreen> createState() => _ManualClauseScreenState();
@@ -94,7 +103,7 @@ class _ManualClauseScreenState extends State<ManualClauseScreen> {
 
       final clause = Clause(
         id: const Uuid().v4(),
-        agreementVersionId: widget.agreementVersionId,
+        agreementVersionId: widget.version.id,
         sourceText: _sourceTextController.text,
         heading:
             _headingController.text.isNotEmpty ? _headingController.text : null,
@@ -115,10 +124,22 @@ class _ManualClauseScreenState extends State<ManualClauseScreen> {
           _state = ClauseUiState.completed;
         });
 
-        // Wait a brief moment to show success state, then pop back
-        await Future.delayed(const Duration(milliseconds: 1500));
+        // Wait a brief moment to show success state
+        await Future.delayed(const Duration(milliseconds: 1000));
+
         if (mounted) {
-          Navigator.of(context).pop(); // pop back to viewer
+          // Push ObligationConfirmationScreen as replacement for ManualClauseScreen
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => ObligationConfirmationScreen(
+                agreement: widget.agreement,
+                version: widget.version,
+                clause:
+                    clause.copyWith(reviewState: ClauseReviewState.confirmed),
+                repository: widget.obligationRepository,
+              ),
+            ),
+          );
         }
       }
     } catch (e) {

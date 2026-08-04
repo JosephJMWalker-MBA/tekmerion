@@ -29,4 +29,29 @@
 - Implemented `AgreementImportService` to orchestrate file ingestion, hashing, and database storage.
 - Replaced original placeholder home screen with `AgreementHomeScreen` representing the Import Agreement flow.
 - Added comprehensive integration tests covering successful imports and edge cases (cancellation, missing bytes, non-PDF).
-- All 41 tests passing; `flutter analyze` clean.
+
+## Phase 1E Status
+- Implemented `AgreementViewerScreen` UI with PDF integrity checking.
+- Implemented `ManualClauseScreen` to allow selecting and inputting a manual clause.
+- Implemented `SqliteClauseRepository` and migrations (v2).
+- Ensured strong test coverage for the clause creation and validation logic.
+
+## Phase 1F Status
+- Implemented `Obligation` and `ScheduleRule` domain models.
+- Implemented `SqliteObligationRepository` to handle saving and confirming obligations and schedule rules.
+- Created `ObligationConfirmationScreen` using `Stepper` for capturing structured fields (Title, Description, Category, Responsible Party, Schedule) and enforcing constraints.
+- Integrated the flow: AgreementViewer -> ManualClause -> ObligationConfirmation.
+- Database schema migration (v3) complete and validated with comprehensive tests.
+
+## Phase 1G Status
+- Added `CompleteObligationService` for drafting and securely finalizing completion records.
+- Added `CompleteObligationScreen` to upload evidence (e.g. receipts) and finalize immutable records.
+- Added `ObligationsListScreen` to track active vs fulfilled obligations.
+- `SqliteObligationRepository` updated to transition status to `fulfilled`.
+
+## Phase 1H Status
+- Added `TimelineEvent` domain model and `TimelineRepository` to construct a chronologically ordered `UNION ALL` projection of all canonical events for an agreement.
+- Implemented tie-breaking determinism by including `displayPriority` and canonical `id` in the sort order.
+- Added `AgreementTimelineScreen` with timeline rendering, grouping events by Month and Year.
+- Integrated the View Timeline action into the Agreement Home Screen.
+- Extended the test suite, achieving 68 passing tests, with no analyzer warnings.

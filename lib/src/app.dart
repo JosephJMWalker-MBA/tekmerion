@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
-import 'features/agreement/presentation/agreement_home_screen.dart';
-import 'features/agreement/application/agreement_import_service.dart';
-import 'features/clause/domain/clause_repository.dart';
+
 import 'core/storage/evidence_storage.dart';
+import 'features/agreement/application/agreement_import_service.dart';
+import 'features/agreement/presentation/agreement_home_screen.dart';
+import 'features/clause/domain/clause_repository.dart';
+import 'features/obligation/domain/obligation_repository.dart';
+import 'features/record/application/complete_obligation_service.dart';
+import 'features/timeline/application/agreement_timeline_service.dart';
 
 class TekmerionApp extends StatelessWidget {
   const TekmerionApp({
     super.key,
     required this.importService,
     required this.clauseRepository,
+    required this.obligationRepository,
     required this.evidenceStorage,
+    required this.completeObligationService,
+    required this.timelineService,
   });
 
   final AgreementImportService importService;
   final ClauseRepository clauseRepository;
+  final ObligationRepository obligationRepository;
   final EvidenceStorage evidenceStorage;
+  final CompleteObligationService completeObligationService;
+  final AgreementTimelineService timelineService;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +49,10 @@ class TekmerionApp extends StatelessWidget {
       home: AgreementHomeScreen(
         importService: importService,
         clauseRepository: clauseRepository,
+        obligationRepository: obligationRepository,
         evidenceStorage: evidenceStorage,
+        completeObligationService: completeObligationService,
+        timelineService: timelineService,
       ),
     );
   }

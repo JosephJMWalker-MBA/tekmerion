@@ -58,7 +58,7 @@ void main() {
     test('migration version is recorded', () async {
       db = await DatabaseMigrations.openAndMigrate(dbPath);
       final version = await db.getVersion();
-      expect(version, equals(2));
+      expect(version, equals(3));
     });
 
     test('foreign keys are enforced', () async {
@@ -108,7 +108,6 @@ void main() {
         onCreate: (db, version) async {
           // Re-create exactly as v1 (simulated by running only v1 migrations)
           for (final statement in DatabaseSchema.phase1Migration) {
-            // We manually remove the new columns from createClausesTable to simulate old schema
             if (statement.contains('CREATE TABLE clauses')) {
               await db.execute('''
                 CREATE TABLE clauses (
@@ -124,6 +123,40 @@ void main() {
                   character_end INTEGER,
                   review_state TEXT NOT NULL,
                   FOREIGN KEY (agreement_version_id) REFERENCES agreement_versions (id) ON DELETE CASCADE
+                );
+              ''');
+            } else if (statement.contains('CREATE TABLE obligations')) {
+              await db.execute('''
+                CREATE TABLE obligations (
+                  id TEXT PRIMARY KEY,
+                  agreement_id TEXT NOT NULL,
+                  source_clause_id TEXT,
+                  responsible_party_id TEXT,
+                  title TEXT NOT NULL,
+                  description TEXT NOT NULL,
+                  obligation_category TEXT NOT NULL,
+                  status TEXT NOT NULL,
+                  confirmed_at TEXT NOT NULL,
+                  superseded_by_obligation_id TEXT,
+                  FOREIGN KEY (agreement_id) REFERENCES agreements (id) ON DELETE CASCADE,
+                  FOREIGN KEY (source_clause_id) REFERENCES clauses (id) ON DELETE SET NULL,
+                  FOREIGN KEY (superseded_by_obligation_id) REFERENCES obligations (id) ON DELETE SET NULL
+                );
+              ''');
+            } else if (statement.contains('CREATE TABLE schedule_rules')) {
+              await db.execute('''
+                CREATE TABLE schedule_rules (
+                  id TEXT PRIMARY KEY,
+                  obligation_id TEXT NOT NULL,
+                  rule_type TEXT NOT NULL,
+                  timezone TEXT NOT NULL,
+                  start_at TEXT NOT NULL,
+                  end_at TEXT,
+                  recurrence_expression TEXT,
+                  lead_time_seconds INTEGER NOT NULL,
+                  grace_period_seconds INTEGER NOT NULL,
+                  confirmed_at TEXT NOT NULL,
+                  FOREIGN KEY (obligation_id) REFERENCES obligations (id) ON DELETE CASCADE
                 );
               ''');
             } else if (!statement.contains('idx_clause_')) {

@@ -1,18 +1,17 @@
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:tekmerion/src/core/database/database_schema.dart';
-import 'package:tekmerion/src/core/integrity/integrity_engine.dart';
-import 'package:tekmerion/src/core/storage/evidence_storage.dart';
 import 'package:tekmerion/src/core/storage/local_evidence_storage.dart';
 import 'package:tekmerion/src/features/agreement/application/agreement_import_service.dart';
 import 'package:tekmerion/src/features/agreement/data/sqlite_agreement_repository.dart';
-import 'package:tekmerion/src/features/record/domain/evidence_envelope.dart';
-import 'package:tekmerion/src/features/agreement/domain/agreement_repository.dart';
 import 'package:tekmerion/src/features/agreement/domain/agreement.dart';
+import 'package:tekmerion/src/features/agreement/domain/agreement_repository.dart';
 import 'package:tekmerion/src/features/agreement/domain/agreement_version.dart';
+import 'package:tekmerion/src/features/record/domain/evidence_envelope.dart';
 
 class MockFilePicker implements FilePickerPort {
   FileSelection? nextSelection;
@@ -63,16 +62,18 @@ void main() {
     );
 
     final dbPath = p.join(tempDir.path, 'test.db');
-    db = await databaseFactory.openDatabase(dbPath,
-        options: OpenDatabaseOptions(
-          version: 1,
-          onCreate: (db, version) async {
-            await db.execute('PRAGMA foreign_keys = ON');
-            await db.execute(DatabaseSchema.createEvidenceAssetsTable);
-            await db.execute(DatabaseSchema.createAgreementsTable);
-            await db.execute(DatabaseSchema.createAgreementVersionsTable);
-          },
-        ));
+    db = await databaseFactory.openDatabase(
+      dbPath,
+      options: OpenDatabaseOptions(
+        version: 1,
+        onCreate: (db, version) async {
+          await db.execute('PRAGMA foreign_keys = ON');
+          await db.execute(DatabaseSchema.createEvidenceAssetsTable);
+          await db.execute(DatabaseSchema.createAgreementsTable);
+          await db.execute(DatabaseSchema.createAgreementVersionsTable);
+        },
+      ),
+    );
 
     repository = SqliteAgreementRepository(db);
     picker = MockFilePicker();
@@ -101,7 +102,9 @@ void main() {
 
   test('non-PDF rejected', () async {
     picker.nextSelection = FileSelection(
-        bytes: Uint8List.fromList([1, 2, 3]), filename: 'image.jpg');
+      bytes: Uint8List.fromList([1, 2, 3]),
+      filename: 'image.jpg',
+    );
     expect(() => service.importLease(), throwsException);
   });
 
@@ -142,7 +145,9 @@ void main() {
     );
 
     picker.nextSelection = FileSelection(
-        bytes: Uint8List.fromList([1, 2, 3]), filename: 'fail.pdf');
+      bytes: Uint8List.fromList([1, 2, 3]),
+      filename: 'fail.pdf',
+    );
 
     try {
       await failingService.importLease();

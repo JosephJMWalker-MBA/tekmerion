@@ -92,7 +92,8 @@ class SqliteClauseRepository implements ClauseRepository {
 
   @override
   Future<List<Clause>> getClausesForAgreementVersion(
-      String agreementVersionId) async {
+    String agreementVersionId,
+  ) async {
     final db = await _getDb();
     final results = await db.query(
       'clauses',

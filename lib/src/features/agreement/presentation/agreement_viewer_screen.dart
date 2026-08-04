@@ -3,8 +3,9 @@ import 'package:pdfrx/pdfrx.dart';
 import 'package:tekmerion/src/core/storage/evidence_storage.dart';
 import 'package:tekmerion/src/features/agreement/domain/agreement.dart';
 import 'package:tekmerion/src/features/agreement/domain/agreement_version.dart';
-import 'package:tekmerion/src/features/record/domain/evidence_envelope.dart';
 import 'package:tekmerion/src/features/clause/domain/clause_repository.dart';
+import 'package:tekmerion/src/features/obligation/domain/obligation_repository.dart';
+import 'package:tekmerion/src/features/record/domain/evidence_envelope.dart';
 
 import '../../clause/presentation/manual_clause_screen.dart';
 
@@ -24,6 +25,7 @@ class AgreementViewerScreen extends StatefulWidget {
     required this.evidence,
     required this.storage,
     required this.clauseRepository,
+    required this.obligationRepository,
   });
 
   final Agreement agreement;
@@ -31,6 +33,7 @@ class AgreementViewerScreen extends StatefulWidget {
   final EvidenceEnvelope evidence;
   final EvidenceStorage storage;
   final ClauseRepository clauseRepository;
+  final ObligationRepository obligationRepository;
 
   @override
   State<AgreementViewerScreen> createState() => _AgreementViewerScreenState();
@@ -90,10 +93,12 @@ class _AgreementViewerScreenState extends State<AgreementViewerScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ManualClauseScreen(
-          agreementVersionId: widget.version.id,
+          agreement: widget.agreement,
+          version: widget.version,
           pageStart: _currentPage,
           pageEnd: _currentPage,
           repository: widget.clauseRepository,
+          obligationRepository: widget.obligationRepository,
         ),
       ),
     );
@@ -139,8 +144,11 @@ class _AgreementViewerScreenState extends State<AgreementViewerScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.verified,
-                            size: 16, color: Colors.green.shade900),
+                        Icon(
+                          Icons.verified,
+                          size: 16,
+                          color: Colors.green.shade900,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Verified unchanged since import into Tekmerion.',

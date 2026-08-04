@@ -52,13 +52,17 @@ class DatabaseSchema {
       id TEXT PRIMARY KEY,
       agreement_id TEXT NOT NULL,
       source_clause_id TEXT,
+      source_type TEXT NOT NULL,
       responsible_party_id TEXT,
+      benefited_party_id TEXT,
       title TEXT NOT NULL,
       description TEXT NOT NULL,
       obligation_category TEXT NOT NULL,
       status TEXT NOT NULL,
-      confirmed_at TEXT NOT NULL,
+      confirmed_at TEXT,
+      confirmed_by_party_id TEXT,
       superseded_by_obligation_id TEXT,
+      created_at TEXT NOT NULL,
       FOREIGN KEY (agreement_id) REFERENCES agreements (id) ON DELETE CASCADE,
       FOREIGN KEY (source_clause_id) REFERENCES clauses (id) ON DELETE SET NULL,
       FOREIGN KEY (superseded_by_obligation_id) REFERENCES obligations (id) ON DELETE SET NULL
@@ -76,6 +80,7 @@ class DatabaseSchema {
       recurrence_expression TEXT,
       lead_time_seconds INTEGER NOT NULL,
       grace_period_seconds INTEGER NOT NULL,
+      source_text TEXT,
       confirmed_at TEXT NOT NULL,
       FOREIGN KEY (obligation_id) REFERENCES obligations (id) ON DELETE CASCADE
     );

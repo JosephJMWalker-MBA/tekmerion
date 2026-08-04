@@ -1,16 +1,17 @@
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tekmerion/src/core/storage/evidence_storage.dart';
 import 'package:tekmerion/src/features/agreement/domain/agreement.dart';
 import 'package:tekmerion/src/features/agreement/domain/agreement_version.dart';
 import 'package:tekmerion/src/features/agreement/presentation/agreement_viewer_screen.dart';
+import 'package:tekmerion/src/features/clause/domain/clause.dart';
 import 'package:tekmerion/src/features/clause/domain/clause_repository.dart';
 import 'package:tekmerion/src/features/clause/presentation/manual_clause_screen.dart';
+import 'package:tekmerion/src/features/obligation/domain/obligation_repository.dart';
 import 'package:tekmerion/src/features/record/domain/evidence_envelope.dart';
 import 'package:tekmerion/src/features/record/domain/evidence_reference.dart';
-
-import 'package:tekmerion/src/features/clause/domain/clause.dart';
 
 class MockEvidenceStorage implements EvidenceStorage {
   EvidenceVerificationState verificationState =
@@ -29,19 +30,21 @@ class MockEvidenceStorage implements EvidenceStorage {
       returnedPath;
 
   @override
-  Future<EvidenceEnvelope> ingestCapturedBytes(
-          {required dynamic bytes,
-          required String originalFilename,
-          required String mimeType,
-          String? derivedFromEvidenceId}) async =>
+  Future<EvidenceEnvelope> ingestCapturedBytes({
+    required dynamic bytes,
+    required String originalFilename,
+    required String mimeType,
+    String? derivedFromEvidenceId,
+  }) async =>
       throw UnimplementedError();
 
   @override
-  Future<EvidenceEnvelope> ingestExternalFile(
-          {required String sourceFilePath,
-          required String originalFilename,
-          required String mimeType,
-          String? derivedFromEvidenceId}) async =>
+  Future<EvidenceEnvelope> ingestExternalFile({
+    required String sourceFilePath,
+    required String originalFilename,
+    required String mimeType,
+    String? derivedFromEvidenceId,
+  }) async =>
       throw UnimplementedError();
 
   @override
@@ -49,10 +52,11 @@ class MockEvidenceStorage implements EvidenceStorage {
       throw UnimplementedError();
 
   @override
-  Future<EvidenceVerificationState> verify(
-      {required String storageIdentifier,
-      required String expectedSha256,
-      required int expectedByteSize}) async {
+  Future<EvidenceVerificationState> verify({
+    required String storageIdentifier,
+    required String expectedSha256,
+    required int expectedByteSize,
+  }) async {
     wasVerifyCalled = true;
     return verificationState;
   }
@@ -77,11 +81,17 @@ class MockClauseRepository implements ClauseRepository {
 
   @override
   Future<List<Clause>> getClausesForAgreementVersion(
-          String agreementVersionId) async =>
+    String agreementVersionId,
+  ) async =>
       [];
 
   @override
   Future<void> updateDraftClause(Clause clause) async {}
+}
+
+class MockObligationRepository implements ObligationRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
@@ -119,22 +129,27 @@ void main() {
     mockStorage.verificationState = EvidenceVerificationState.hashMismatch;
     final mockRepo = MockClauseRepository();
 
-    await tester.pumpWidget(MaterialApp(
-      home: AgreementViewerScreen(
-        agreement: agreement,
-        version: version,
-        evidence: evidence,
-        storage: mockStorage,
-        clauseRepository: mockRepo,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AgreementViewerScreen(
+          agreement: agreement,
+          version: version,
+          evidence: evidence,
+          storage: mockStorage,
+          clauseRepository: mockRepo,
+          obligationRepository: MockObligationRepository(),
+        ),
       ),
-    ));
+    );
 
     await tester.pumpAndSettle();
 
     expect(mockStorage.wasVerifyCalled, isTrue);
     expect(find.text('Integrity Failure'), findsOneWidget);
-    expect(find.textContaining('will not use it for clause creation'),
-        findsOneWidget);
+    expect(
+      find.textContaining('will not use it for clause creation'),
+      findsOneWidget,
+    );
     expect(find.text('Add a clause'), findsNothing);
   });
 
@@ -144,21 +159,26 @@ void main() {
     final mockRepo = MockClauseRepository();
     // We cannot render real pdfrx on headless tests without some setup, but we expect it to show Add a clause.
 
-    await tester.pumpWidget(MaterialApp(
-      home: AgreementViewerScreen(
-        agreement: agreement,
-        version: version,
-        evidence: evidence,
-        storage: mockStorage,
-        clauseRepository: mockRepo,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AgreementViewerScreen(
+          agreement: agreement,
+          version: version,
+          evidence: evidence,
+          storage: mockStorage,
+          clauseRepository: mockRepo,
+          obligationRepository: MockObligationRepository(),
+        ),
       ),
-    ));
+    );
 
     await tester.pumpAndSettle();
 
     expect(mockStorage.wasVerifyCalled, isTrue);
-    expect(find.text('Verified unchanged since import into Tekmerion.'),
-        findsOneWidget);
+    expect(
+      find.text('Verified unchanged since import into Tekmerion.'),
+      findsOneWidget,
+    );
     expect(find.text('Add a clause'), findsOneWidget);
   });
 
@@ -166,14 +186,18 @@ void main() {
       (tester) async {
     final mockRepo = MockClauseRepository();
 
-    await tester.pumpWidget(MaterialApp(
-      home: ManualClauseScreen(
-        agreementVersionId: 'v1',
-        pageStart: 2,
-        pageEnd: 2,
-        repository: mockRepo,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ManualClauseScreen(
+          agreement: agreement,
+          version: version,
+          pageStart: 2,
+          pageEnd: 2,
+          repository: mockRepo,
+          obligationRepository: MockObligationRepository(),
+        ),
       ),
-    ));
+    );
 
     await tester.pumpAndSettle();
 
@@ -182,7 +206,9 @@ void main() {
 
     // Fill form
     await tester.enterText(
-        find.byType(TextFormField).first, 'Exact text of clause');
+      find.byType(TextFormField).first,
+      'Exact text of clause',
+    );
 
     // Try to review
     await tester.tap(find.text('Review Clause'));
@@ -190,9 +216,11 @@ void main() {
 
     // Ensure we are in reviewing state
     expect(
-        find.text(
-            'Please review the clause carefully. Manual clauses must match the document precisely.'),
-        findsOneWidget);
+      find.text(
+        'Please review the clause carefully. Manual clauses must match the document precisely.',
+      ),
+      findsOneWidget,
+    );
 
     // Save
     await tester.tap(find.text('Confirm & Save'));
@@ -200,10 +228,14 @@ void main() {
 
     expect(mockRepo.createdDrafts, hasLength(1));
     expect(mockRepo.confirmedIds, hasLength(1));
-    expect(mockRepo.createdDrafts.first.sourceText,
-        equals('Exact text of clause'));
+    expect(
+      mockRepo.createdDrafts.first.sourceText,
+      equals('Exact text of clause'),
+    );
     expect(mockRepo.createdDrafts.first.pageStart, equals(2));
-    expect(mockRepo.createdDrafts.first.reviewState,
-        equals(ClauseReviewState.draft)); // Initial insertion
+    expect(
+      mockRepo.createdDrafts.first.reviewState,
+      equals(ClauseReviewState.draft),
+    ); // Initial insertion
   });
 }

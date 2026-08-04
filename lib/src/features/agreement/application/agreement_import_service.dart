@@ -1,10 +1,12 @@
 import 'dart:typed_data';
+
 import 'package:uuid/uuid.dart';
-import '../../record/domain/evidence_envelope.dart';
+
 import '../../../core/storage/evidence_storage.dart';
+import '../../record/domain/evidence_envelope.dart';
 import '../domain/agreement.dart';
-import '../domain/agreement_version.dart';
 import '../domain/agreement_repository.dart';
+import '../domain/agreement_version.dart';
 
 abstract class FilePickerPort {
   Future<FileSelection?> pickPdfFile();
@@ -43,8 +45,9 @@ class AgreementImportService {
   final EvidenceStorage evidenceStorage;
   final AgreementRepository agreementRepository;
 
-  Future<ImportResult?> importLease(
-      {void Function(String state)? onStateChange}) async {
+  Future<ImportResult?> importLease({
+    void Function(String state)? onStateChange,
+  }) async {
     // 1. Pick file
     onStateChange?.call('selecting');
     final selection = await filePicker.pickPdfFile();

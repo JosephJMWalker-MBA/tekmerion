@@ -6,7 +6,7 @@ class DatabaseMigrations {
   static Future<Database> openAndMigrate(String path) async {
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onConfigure: (db) async {
         // Enforce foreign keys for all connections
         await db.execute('PRAGMA foreign_keys = ON');
@@ -20,17 +20,51 @@ class DatabaseMigrations {
         if (oldVersion < 2) {
           // Add missing columns to clauses
           await db.execute(
-              'ALTER TABLE clauses ADD COLUMN parent_clause_id TEXT REFERENCES clauses (id) ON DELETE SET NULL');
+            'ALTER TABLE clauses ADD COLUMN parent_clause_id TEXT REFERENCES clauses (id) ON DELETE SET NULL',
+          );
           await db
               .execute('ALTER TABLE clauses ADD COLUMN parse_confidence REAL');
           await db.execute(
-              'ALTER TABLE clauses ADD COLUMN created_at TEXT NOT NULL DEFAULT ""');
+            'ALTER TABLE clauses ADD COLUMN created_at TEXT NOT NULL DEFAULT ""',
+          );
           await db.execute('ALTER TABLE clauses ADD COLUMN confirmed_at TEXT');
 
           // Add new indexes
           await db.execute(DatabaseSchema.indexClauseAgreementVersion);
           await db.execute(DatabaseSchema.indexClausePageRanges);
           await db.execute(DatabaseSchema.indexClauseReviewState);
+        }
+        if (oldVersion < 3) {
+          // Add source_text to schedule_rules
+          await db.execute(
+            'ALTER TABLE schedule_rules ADD COLUMN source_text TEXT',
+          );
+
+          // Rebuild obligations table to handle NOT NULL to NULL changes and new columns
+          await db.execute('PRAGMA foreign_keys = OFF');
+
+          await db.execute('ALTER TABLE obligations RENAME TO obligations_old');
+
+          await db.execute(DatabaseSchema.createObligationsTable);
+
+          await db.execute('''
+            INSERT INTO obligations (
+              id, agreement_id, source_clause_id, source_type,
+              responsible_party_id, benefited_party_id, title, description,
+              obligation_category, status, confirmed_at, confirmed_by_party_id,
+              superseded_by_obligation_id, created_at
+            )
+            SELECT 
+              id, agreement_id, source_clause_id, 'contractual',
+              responsible_party_id, NULL, title, description,
+              obligation_category, status, confirmed_at, NULL,
+              superseded_by_obligation_id, confirmed_at
+            FROM obligations_old
+          ''');
+
+          await db.execute('DROP TABLE obligations_old');
+
+          await db.execute('PRAGMA foreign_keys = ON');
         }
       },
     );

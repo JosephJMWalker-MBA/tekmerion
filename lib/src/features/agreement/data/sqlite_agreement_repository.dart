@@ -83,7 +83,8 @@ class SqliteAgreementRepository implements AgreementRepository {
 
   @override
   Future<List<AgreementVersion>> getVersionsForAgreement(
-      String agreementId) async {
+    String agreementId,
+  ) async {
     final rows = await _db.query(
       'agreement_versions',
       where: 'agreement_id = ?',

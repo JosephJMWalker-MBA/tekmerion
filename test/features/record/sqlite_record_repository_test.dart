@@ -187,11 +187,13 @@ void main() {
         'id': 'o1',
         'agreement_id': 'a1',
         'source_clause_id': 'c1', // Provenance preserved
+        'source_type': 'contractual',
         'title': 'Pay Rent',
         'description': 'Pay rent monthly',
         'obligation_category': 'payment',
         'status': 'confirmed',
         'confirmed_at': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
       });
 
       final rows = await db.query('obligations');
