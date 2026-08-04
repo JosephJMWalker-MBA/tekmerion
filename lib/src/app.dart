@@ -32,16 +32,36 @@ class AgreementHomeScreen extends StatelessWidget {
   const AgreementHomeScreen({super.key});
 
   static const List<_LoopStep> _steps = <_LoopStep>[
-    _LoopStep(Icons.upload_file, 'Upload', 'Preserve the signed agreement.'),
-    _LoopStep(Icons.fact_check_outlined, 'Confirm',
-        'Review obligations and their source clauses.'),
-    _LoopStep(Icons.notifications_none, 'Remember',
-        'Receive reminders from confirmed rules.'),
-    _LoopStep(Icons.add_a_photo_outlined, 'Document',
-        'Capture performance, issues, and evidence.'),
-    _LoopStep(Icons.link, 'Connect', 'Link each record to the agreement.'),
-    _LoopStep(Icons.inventory_2_outlined, 'Export',
-        'Carry a readable Record Package to a third party.'),
+    _LoopStep(
+      Icons.upload_file,
+      'Upload',
+      'Preserve the signed agreement.',
+    ),
+    _LoopStep(
+      Icons.fact_check_outlined,
+      'Confirm',
+      'Review obligations and their source clauses.',
+    ),
+    _LoopStep(
+      Icons.notifications_none,
+      'Remember',
+      'Receive reminders from confirmed rules.',
+    ),
+    _LoopStep(
+      Icons.add_a_photo_outlined,
+      'Document',
+      'Capture performance, issues, and evidence.',
+    ),
+    _LoopStep(
+      Icons.link,
+      'Connect',
+      'Link each record to the agreement.',
+    ),
+    _LoopStep(
+      Icons.inventory_2_outlined,
+      'Export',
+      'Carry a readable Record Package to a third party.',
+    ),
   ];
 
   @override
