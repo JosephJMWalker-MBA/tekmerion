@@ -29,10 +29,11 @@ Create enough product and architecture clarity that the first vertical slice can
 - [x] Define parser-stage artifact schema
 - [x] Define finalized-record correction behavior in testable terms
 - [x] Choose Flutter package/application identifier (`com.aerialsoft.tekmerion`)
-- [ ] Choose license
-- [ ] Create initial issue labels and milestones
+- [x] Choose license (proprietary; all rights reserved)
+- [x] Define initial issue-label taxonomy and milestone plan
+- [ ] Create custom labels and milestones in GitHub administration
 - [x] Confirm minimum supported Android version (API 24 / Android 7.0)
-- [ ] Select sample leases for parser fixtures
+- [x] Select and commit the first synthetic lease parser fixture
 
 ### Exit criteria
 
@@ -213,4 +214,4 @@ Expansion should occur through templates and domain packs, not by weakening the 
 
 ## Current Next Action
 
-Choose the repository license and initial lease fixtures, then scaffold Flutter with `--org com.aerialsoft`, project name `tekmerion`, and Android `minSdk 24`.
+Create the GitHub custom labels and milestones when administrative tooling permits, then scaffold Flutter with `--org com.aerialsoft`, project name `tekmerion`, and Android `minSdk 24`.
