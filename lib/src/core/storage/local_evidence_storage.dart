@@ -21,7 +21,7 @@ class LocalEvidenceStorage implements EvidenceStorage {
   /// Returns the sanitized filename, falling back to evidenceId if it contains invalid chars.
   String _sanitizeFilename(String originalFilename, String evidenceId) {
     // Extract basename
-    var basename = originalFilename.split('/').last.split('\\').last;
+    final basename = originalFilename.split('/').last.split('\\').last;
     // Keep alphanumeric, period, dash, underscore
     var sanitized = basename.replaceAll(RegExp(r'[^a-zA-Z0-9.\-_]'), '_');
     sanitized = sanitized.replaceAll('..', '_');
@@ -177,6 +177,12 @@ class LocalEvidenceStorage implements EvidenceStorage {
     } catch (_) {
       return false;
     }
+  }
+
+  @override
+  Future<String> getLocalFilePath(String storageIdentifier) async {
+    final file = await _resolveFile(storageIdentifier);
+    return file.path;
   }
 
   @override

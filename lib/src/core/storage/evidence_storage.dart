@@ -42,6 +42,10 @@ abstract interface class EvidenceStorage {
   /// Checks whether a managed asset exists in storage.
   Future<bool> exists(String storageIdentifier);
 
+  /// Resolves the local absolute path of the managed file for native SDK consumption (e.g. PDF viewers).
+  /// This should only be used after `verify()` returns a successful state.
+  Future<String> getLocalFilePath(String storageIdentifier);
+
   /// Deletes a draft asset. Only permitted if the asset has not been linked to a finalized record.
   Future<void> deleteDraftAsset(String storageIdentifier);
 }
