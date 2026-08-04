@@ -1,0 +1,218 @@
+{
+  "fixture_schema_version": "1.0.0",
+  "fixture_id": "00000000-0000-4000-8000-000000000001",
+  "source_path": "fixtures/leases/synthetic/residential-lease-v1.txt",
+  "document_type": "residential_lease",
+  "expected_parties": [
+    {
+      "display_name": "North Star Property LLC",
+      "party_type": "organization",
+      "role": "landlord"
+    },
+    {
+      "display_name": "Jordan Reed",
+      "party_type": "person",
+      "role": "tenant"
+    },
+    {
+      "display_name": "Morgan Lee",
+      "party_type": "person",
+      "role": "property_manager_signatory"
+    }
+  ],
+  "expected_subject": {
+    "subject_type": "rental_unit",
+    "display_name": "Apartment 2B",
+    "address": "101 Example Street, Sample City, Ohio 44000"
+  },
+  "expected_dates": [
+    {
+      "type": "agreement_start",
+      "value": "2026-09-01",
+      "source_clause": "2.1"
+    },
+    {
+      "type": "agreement_end",
+      "value": "2027-08-31",
+      "source_clause": "2.1"
+    },
+    {
+      "type": "signature_date",
+      "value": "2026-08-20",
+      "source_clause": "14"
+    }
+  ],
+  "expected_obligations": [
+    {
+      "source_clause": "3.1",
+      "responsible_party_role": "tenant",
+      "benefited_party_role": "landlord",
+      "category": "rent",
+      "title": "Pay monthly rent",
+      "description": "Pay $900.00 in monthly rent.",
+      "schedule": {
+        "rule_type": "monthly_day_of_month",
+        "day": 1,
+        "timezone_required": true
+      },
+      "requested_documentation": ["receipt", "payment_confirmation"]
+    },
+    {
+      "source_clause": "3.4",
+      "responsible_party_role": "tenant",
+      "category": "utilities",
+      "title": "Pay electricity and internet",
+      "schedule": null
+    },
+    {
+      "source_clause": "3.4",
+      "responsible_party_role": "landlord",
+      "category": "utilities",
+      "title": "Pay water and sewer",
+      "schedule": null
+    },
+    {
+      "source_clause": "5.1",
+      "responsible_party_role": "tenant",
+      "category": "move_in",
+      "title": "Complete move-in condition checklist",
+      "schedule": {
+        "rule_type": "relative_to_possession",
+        "offset_days": 3
+      },
+      "requested_documentation": ["checklist", "photo"]
+    },
+    {
+      "source_clause": "6.1",
+      "responsible_party_role": "landlord",
+      "category": "maintenance",
+      "title": "Maintain major building systems",
+      "schedule": null
+    },
+    {
+      "source_clause": "6.2",
+      "responsible_party_role": "landlord",
+      "category": "yard_and_exterior",
+      "title": "Maintain the common rear yard",
+      "schedule": null
+    },
+    {
+      "source_clause": "6.3",
+      "responsible_party_role": "tenant",
+      "category": "cleanliness",
+      "title": "Keep apartment reasonably clean",
+      "schedule": null
+    },
+    {
+      "source_clause": "6.4",
+      "responsible_party_role": "tenant",
+      "category": "maintenance_reporting",
+      "title": "Report repair conditions in writing",
+      "schedule": {
+        "rule_type": "event_triggered",
+        "trigger": "condition_discovered"
+      },
+      "requested_documentation": ["written_notice", "photo_optional"]
+    },
+    {
+      "source_clause": "7.1",
+      "responsible_party_role": "tenant",
+      "category": "safety",
+      "title": "Test smoke detector monthly",
+      "schedule": {
+        "rule_type": "monthly_weekday_ordinal",
+        "ordinal": 1,
+        "weekday": "saturday"
+      },
+      "requested_documentation": ["completion_record"]
+    },
+    {
+      "source_clause": "7.2",
+      "responsible_party_role": "tenant",
+      "category": "safety_reporting",
+      "title": "Report a failed smoke-detector test",
+      "schedule": {
+        "rule_type": "event_triggered",
+        "trigger": "smoke_detector_test_failed",
+        "same_day": true
+      }
+    },
+    {
+      "source_clause": "7.3",
+      "responsible_party_role": "landlord",
+      "category": "safety_repair",
+      "title": "Repair or replace reported nonworking smoke detector",
+      "schedule": null
+    },
+    {
+      "source_clause": "8.1",
+      "responsible_party_role": "landlord",
+      "category": "entry_notice",
+      "title": "Give written notice before nonemergency entry",
+      "schedule": {
+        "rule_type": "relative_before_event",
+        "lead_time_hours": 24
+      }
+    },
+    {
+      "source_clause": "8.2",
+      "responsible_party_role": "tenant",
+      "category": "access",
+      "title": "Permit lawful entry after required notice",
+      "schedule": {
+        "rule_type": "event_triggered",
+        "trigger": "valid_entry_notice_received"
+      }
+    },
+    {
+      "source_clause": "10.1",
+      "responsible_party_role": "tenant",
+      "category": "insurance",
+      "title": "Maintain renters insurance",
+      "schedule": {
+        "rule_type": "continuous_during_term"
+      },
+      "requested_documentation": ["insurance_evidence"]
+    },
+    {
+      "source_clause": "11.1",
+      "responsible_party_role": "either_party",
+      "category": "nonrenewal_notice",
+      "title": "Give written nonrenewal notice",
+      "schedule": {
+        "rule_type": "relative_before_agreement_end",
+        "lead_time_days": 30,
+        "ambiguity_flags": ["governing_law_may_require_different_period"]
+      }
+    },
+    {
+      "source_clause": "12.1",
+      "responsible_party_role": "tenant",
+      "category": "move_out",
+      "title": "Remove property and leave apartment reasonably clean",
+      "schedule": {
+        "rule_type": "by_agreement_end"
+      }
+    }
+  ],
+  "must_not_infer": [
+    {
+      "source_clause": "4.2",
+      "rule": "Do not invent a numeric security-deposit deadline."
+    },
+    {
+      "source_clause": "6.1",
+      "rule": "Do not determine legal breach, habitability, negligence, or liability."
+    },
+    {
+      "source_clause": "11.2",
+      "rule": "Do not claim an app reminder or record satisfies a legally required delivery method."
+    }
+  ],
+  "review_expectations": {
+    "all_obligations_begin_as_candidates": true,
+    "human_confirmation_required": true,
+    "source_clause_required": true,
+    "uncertain_legal_language_flagged": true
+  }
+}
