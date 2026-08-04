@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aerial-soft.example/schemas/tekmerion/record-canonical-payload.schema.json",
+  "title": "Tekmerion Finalized Record Canonical Payload",
+  "description": "Logical payload serialized deterministically before record hashing and chain construction.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_id",
+    "workspace_id",
+    "agreement_id",
+    "record_type",
+    "title",
+    "factual_description",
+    "occurred_at",
+    "recorded_at",
+    "timezone",
+    "created_by_party_id",
+    "finalized_at",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "record_id": {"type": "string", "format": "uuid"},
+    "workspace_id": {"type": "string", "format": "uuid"},
+    "agreement_id": {"type": "string", "format": "uuid"},
+    "agreement_version_id": {"type": ["string", "null"], "format": "uuid"},
+    "obligation_id": {"type": ["string", "null"], "format": "uuid"},
+    "source_clause_id": {"type": ["string", "null"], "format": "uuid"},
+    "record_type": {
+      "type": "string",
+      "enum": [
+        "firsthand_observation",
+        "performance",
+        "payment",
+        "communication_sent",
+        "communication_received",
+        "imported_source",
+        "other_party_assertion",
+        "user_interpretation",
+        "resolution",
+        "correction"
+      ]
+    },
+    "title": {"type": "string", "minLength": 1},
+    "factual_description": {"type": "string", "minLength": 1},
+    "interpretation_text": {"type": ["string", "null"]},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "recorded_at": {"type": "string", "format": "date-time"},
+    "timezone": {"type": "string", "minLength": 1},
+    "location_data": {
+      "oneOf": [
+        {"$ref": "#/$defs/location"},
+        {"type": "null"}
+      ]
+    },
+    "created_by_party_id": {"type": "string", "format": "uuid"},
+    "corrects_record_entry_id": {"type": ["string", "null"], "format": "uuid"},
+    "finalized_at": {"type": "string", "format": "date-time"},
+    "evidence": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidenceReference"}
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["device", "user_entered", "evidence_metadata"]
+        },
+        "latitude": {"type": ["number", "null"], "minimum": -90, "maximum": 90},
+        "longitude": {"type": ["number", "null"], "minimum": -180, "maximum": 180},
+        "accuracy_meters": {"type": ["number", "null"], "minimum": 0},
+        "display_text": {"type": ["string", "null"]}
+      }
+    },
+    "evidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "relationship_type",
+        "sha256",
+        "asset_role",
+        "capture_method"
+      ],
+      "properties": {
+        "evidence_id": {"type": "string", "format": "uuid"},
+        "relationship_type": {"type": "string"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "asset_role": {
+          "type": "string",
+          "enum": ["original", "preview", "thumbnail", "ocr_rendering", "redacted_copy", "annotated_copy", "other_derivative"]
+        },
+        "capture_method": {
+          "type": "string",
+          "enum": ["in_app_capture", "external_import", "generated_by_tekmerion"]
+        },
+        "display_order": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}
