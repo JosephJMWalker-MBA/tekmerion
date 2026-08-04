@@ -1,6 +1,8 @@
+import 'dart:async';
+import '../../../core/integrity/integrity_engine.dart';
 import '../domain/record_canonicalizer.dart';
 import '../domain/record_entry.dart';
-import '../domain/record_integrity_engine.dart';
+import '../domain/record_repository.dart';
 
 class RecordMutationException implements Exception {
   const RecordMutationException(this.message);
@@ -11,24 +13,26 @@ class RecordMutationException implements Exception {
   String toString() => 'RecordMutationException: $message';
 }
 
-class InMemoryRecordRepository {
+class InMemoryRecordRepository implements RecordRepository {
   InMemoryRecordRepository({
-    required RecordIntegrityEngine integrityEngine,
+    required IntegrityEngine integrityEngine,
     RecordCanonicalizer canonicalizer = const RecordCanonicalizer(),
     DateTime Function()? clock,
   })  : _integrityEngine = integrityEngine,
         _canonicalizer = canonicalizer,
         _clock = clock ?? DateTime.now;
 
-  final RecordIntegrityEngine _integrityEngine;
+  final IntegrityEngine _integrityEngine;
   final RecordCanonicalizer _canonicalizer;
   final DateTime Function() _clock;
   final Map<String, RecordEntry> _records = <String, RecordEntry>{};
   final Map<String, String> _latestAgreementChainHash = <String, String>{};
 
-  RecordEntry? getById(String id) => _records[id];
+  @override
+  Future<RecordEntry?> getById(String id) async => _records[id];
 
-  List<RecordEntry> allForAgreement(String agreementId) {
+  @override
+  Future<List<RecordEntry>> allForAgreement(String agreementId) async {
     final List<RecordEntry> records = _records.values
         .where((RecordEntry record) => record.agreementId == agreementId)
         .toList()
@@ -39,7 +43,8 @@ class InMemoryRecordRepository {
     return List<RecordEntry>.unmodifiable(records);
   }
 
-  void saveDraft(RecordEntry draft) {
+  @override
+  Future<void> saveDraft(RecordEntry draft) async {
     if (draft.state != RecordState.draft || draft.finalizedAt != null) {
       throw const RecordMutationException('Only mutable drafts may be saved.');
     }
@@ -49,7 +54,8 @@ class InMemoryRecordRepository {
     _records[draft.id] = draft;
   }
 
-  void updateDraft(RecordEntry updatedDraft) {
+  @override
+  Future<void> updateDraft(RecordEntry updatedDraft) async {
     final RecordEntry current = _requireRecord(updatedDraft.id);
     if (current.isFinalized) {
       throw const RecordMutationException(
@@ -63,7 +69,8 @@ class InMemoryRecordRepository {
     _records[updatedDraft.id] = updatedDraft;
   }
 
-  RecordEntry finalize(String id) {
+  @override
+  Future<RecordEntry> finalize(String id) async {
     final RecordEntry draft = _requireRecord(id);
     if (draft.isFinalized) {
       throw const RecordMutationException('Record is already finalized.');
@@ -92,6 +99,18 @@ class InMemoryRecordRepository {
     _records[id] = finalized;
     _latestAgreementChainHash[draft.agreementId] = chainHash;
     return finalized;
+  }
+
+  @override
+  Future<bool> hasEvidence(String evidenceId) async {
+    // For this pure repository prototype, evidence bytes availability is 
+    // asserted via the domain EvidenceReference itself before finalization.
+    return true; 
+  }
+
+  @override
+  Future<String?> getLatestChainHashForAgreement(String agreementId) async {
+    return _latestAgreementChainHash[agreementId];
   }
 
   void _validateFinalization(RecordEntry draft) {

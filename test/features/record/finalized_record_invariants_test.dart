@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tekmerion/src/core/integrity/integrity_engine.dart';
 import 'package:tekmerion/src/features/record/data/in_memory_record_repository.dart';
 import 'package:tekmerion/src/features/record/domain/evidence_reference.dart';
 import 'package:tekmerion/src/features/record/domain/record_entry.dart';
-import 'package:tekmerion/src/features/record/domain/record_integrity_engine.dart';
 
 void main() {
   group('finalized record invariants', () {
@@ -15,11 +15,11 @@ void main() {
       );
     });
 
-    test('a valid draft finalizes with record and chain hashes', () {
+    test('a valid draft finalizes with record and chain hashes', () async {
       final RecordEntry draft = _draft();
-      repository.saveDraft(draft);
+      await repository.saveDraft(draft);
 
-      final RecordEntry finalized = repository.finalize(draft.id);
+      final RecordEntry finalized = await repository.finalize(draft.id);
 
       expect(finalized.state, RecordState.finalized);
       expect(finalized.finalizedAt, DateTime.utc(2026, 8, 3, 20, 30));
@@ -27,10 +27,10 @@ void main() {
       expect(finalized.chainHash, isNotEmpty);
     });
 
-    test('a finalized record cannot be silently updated', () {
+    test('a finalized record cannot be silently updated', () async {
       final RecordEntry draft = _draft();
-      repository.saveDraft(draft);
-      final RecordEntry finalized = repository.finalize(draft.id);
+      await repository.saveDraft(draft);
+      final RecordEntry finalized = await repository.finalize(draft.id);
 
       expect(
         () => repository.updateDraft(
@@ -40,7 +40,7 @@ void main() {
       );
     });
 
-    test('missing evidence bytes prevent finalization', () {
+    test('missing evidence bytes prevent finalization', () async {
       final RecordEntry draft = _draft(
         evidence: const <EvidenceReference>[
           EvidenceReference(
@@ -53,7 +53,7 @@ void main() {
           ),
         ],
       );
-      repository.saveDraft(draft);
+      await repository.saveDraft(draft);
 
       expect(
         () => repository.finalize(draft.id),
@@ -61,16 +61,16 @@ void main() {
       );
     });
 
-    test('a correction must target a finalized record', () {
+    test('a correction must target a finalized record', () async {
       final RecordEntry originalDraft = _draft();
-      repository.saveDraft(originalDraft);
+      await repository.saveDraft(originalDraft);
 
       final RecordEntry correction = _draft(
         id: 'record-correction',
         recordType: RecordType.correction,
         correctsRecordEntryId: originalDraft.id,
       );
-      repository.saveDraft(correction);
+      await repository.saveDraft(correction);
 
       expect(
         () => repository.finalize(correction.id),
@@ -78,10 +78,10 @@ void main() {
       );
     });
 
-    test('a finalized correction preserves the original', () {
+    test('a finalized correction preserves the original', () async {
       final RecordEntry originalDraft = _draft();
-      repository.saveDraft(originalDraft);
-      final RecordEntry original = repository.finalize(originalDraft.id);
+      await repository.saveDraft(originalDraft);
+      final RecordEntry original = await repository.finalize(originalDraft.id);
 
       final RecordEntry correctionDraft = _draft(
         id: 'record-correction',
@@ -90,10 +90,11 @@ void main() {
         correctsRecordEntryId: original.id,
         recordedAt: DateTime.utc(2026, 8, 3, 20, 31),
       );
-      repository.saveDraft(correctionDraft);
-      final RecordEntry correction = repository.finalize(correctionDraft.id);
+      await repository.saveDraft(correctionDraft);
+      final RecordEntry correction = await repository.finalize(correctionDraft.id);
 
-      expect(repository.getById(original.id)?.factualDescription,
+      final fetchedOriginal = await repository.getById(original.id);
+      expect(fetchedOriginal?.factualDescription,
           original.factualDescription);
       expect(correction.correctsRecordEntryId, original.id);
       expect(correction.previousChainHash, original.chainHash);
@@ -138,7 +139,7 @@ RecordEntry _draft({
   );
 }
 
-class _FakeIntegrityEngine implements RecordIntegrityEngine {
+class _FakeIntegrityEngine implements IntegrityEngine {
   const _FakeIntegrityEngine();
 
   @override
