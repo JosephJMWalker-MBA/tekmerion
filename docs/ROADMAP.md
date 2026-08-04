@@ -23,10 +23,11 @@ Create enough product and architecture clarity that the first vertical slice can
 - [x] Product specification
 - [x] Domain model
 - [x] Local-first Flutter ADR
+- [x] Evidence-integrity ADR
 - [x] Roadmap
-- [ ] Define export manifest schema
-- [ ] Define parser-stage artifact schema
-- [ ] Define finalized-record correction behavior in testable terms
+- [x] Define export manifest schema
+- [x] Define parser-stage artifact schema
+- [x] Define finalized-record correction behavior in testable terms
 - [x] Choose Flutter package/application identifier (`com.aerialsoft.tekmerion`)
 - [ ] Choose license
 - [ ] Create initial issue labels and milestones
@@ -212,4 +213,4 @@ Expansion should occur through templates and domain packs, not by weakening the 
 
 ## Current Next Action
 
-Create the implementation backlog for Phase 1, then scaffold the Flutter project only after the remaining Phase 0 decisions are resolved.
+Choose the repository license and initial lease fixtures, then scaffold Flutter with `--org com.aerialsoft`, project name `tekmerion`, and Android `minSdk 24`.
