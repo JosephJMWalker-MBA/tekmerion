@@ -12,6 +12,10 @@ void main() {
     expect(find.text('Confirm'), findsOneWidget);
     expect(find.text('Remember'), findsOneWidget);
     expect(find.text('Document'), findsOneWidget);
+
+    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.pumpAndSettle();
+
     expect(find.text('Connect'), findsOneWidget);
     expect(find.text('Export'), findsOneWidget);
     expect(find.byType(FilledButton), findsOneWidget);

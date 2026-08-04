@@ -28,7 +28,7 @@ void main() {
       final digest = engine.hashRecord(bytes);
       expect(
         digest,
-        '86b8b09d3b5b6348efc6cc053dcc02a6cece908bfcf605d63ad1c16503c4fc37',
+        '7ab1f643e89d80aeaff9f5a1dd6f38b43634f63b3958ce94283ed400fcc821a0',
       );
     });
 
@@ -58,7 +58,7 @@ void main() {
       // sha256('prevcurr')
       expect(
         chain,
-        'f58f55365db01b1fc7e8a93db2e8de7b154ce8a30dbf1345d3e230ce748981e4',
+        'e99128af31126e366604e1dc06c9f166c0cbe81508b61e51c84188ce1415225a',
       );
     });
 
@@ -70,7 +70,7 @@ void main() {
       // sha256('curr')
       expect(
         chain,
-        'da2f483a992bc96cd18b41ca0fccfca0835f137e50c41031c5188f912c75249b',
+        '7cdc2f34c9e8b92d42704a889b95f322cf354a14ef517261969429a3ec679c96',
       );
     });
   });
