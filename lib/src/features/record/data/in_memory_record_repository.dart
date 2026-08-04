@@ -103,9 +103,9 @@ class InMemoryRecordRepository implements RecordRepository {
 
   @override
   Future<bool> hasEvidence(String evidenceId) async {
-    // For this pure repository prototype, evidence bytes availability is 
+    // For this pure repository prototype, evidence bytes availability is
     // asserted via the domain EvidenceReference itself before finalization.
-    return true; 
+    return true;
   }
 
   @override

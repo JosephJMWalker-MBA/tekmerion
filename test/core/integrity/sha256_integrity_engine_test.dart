@@ -45,7 +45,7 @@ void main() {
 
       final modifiedBytes = List<int>.from(bytes);
       modifiedBytes[0] = modifiedBytes[0] + 1;
-      
+
       final modified = engine.hashRecord(modifiedBytes);
       expect(original, isNot(modified));
     });

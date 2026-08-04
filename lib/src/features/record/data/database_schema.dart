@@ -1,5 +1,5 @@
 /// Minimal SQLite schema definition for Phase 1 persistence boundary.
-/// 
+///
 /// These strings define the exact schema required for the core vertical slice
 /// (upload -> confirm obligation -> remind -> document -> link to clause -> export)
 /// without speculatively implementing deferred features like sync or communities.

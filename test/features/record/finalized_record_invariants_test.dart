@@ -91,11 +91,11 @@ void main() {
         recordedAt: DateTime.utc(2026, 8, 3, 20, 31),
       );
       await repository.saveDraft(correctionDraft);
-      final RecordEntry correction = await repository.finalize(correctionDraft.id);
+      final RecordEntry correction =
+          await repository.finalize(correctionDraft.id);
 
       final fetchedOriginal = await repository.getById(original.id);
-      expect(fetchedOriginal?.factualDescription,
-          original.factualDescription);
+      expect(fetchedOriginal?.factualDescription, original.factualDescription);
       expect(correction.correctsRecordEntryId, original.id);
       expect(correction.previousChainHash, original.chainHash);
     });
