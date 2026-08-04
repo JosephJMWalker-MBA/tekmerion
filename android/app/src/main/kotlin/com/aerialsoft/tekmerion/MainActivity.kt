@@ -1,0 +1,5 @@
+package com.aerialsoft.tekmerion
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
