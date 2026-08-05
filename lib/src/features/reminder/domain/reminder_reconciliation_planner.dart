@@ -19,7 +19,7 @@ class ReminderReconciliationPlanner {
     final operations = <ReconciliationOperation>[];
     
     final persistedByOccurrence = {
-      for (final r in persistedReminders) r.occurrenceKey: r
+      for (final r in persistedReminders) r.occurrenceKey: r,
     };
     
     // We must track used IDs to avoid collisions among both preserved and newly inserted
@@ -42,7 +42,7 @@ class ReminderReconciliationPlanner {
               ? ReconciliationReasonCode.terminalHistoryPreserved
               : ReconciliationReasonCode.occurrenceBeforeNowPreserved,
           localNotificationId: persisted.localNotificationId,
-        ));
+        ),);
         continue;
       }
 
@@ -52,7 +52,7 @@ class ReminderReconciliationPlanner {
           reminder: persisted,
           type: ReconciliationOperationType.cancel,
           reason: ReconciliationReasonCode.obligationFulfilled,
-        ));
+        ),);
         continue;
       }
 
@@ -67,7 +67,7 @@ class ReminderReconciliationPlanner {
           reminder: persisted,
           type: ReconciliationOperationType.supersede,
           reason: ReconciliationReasonCode.ruleSupersededAndOccurrenceFuture,
-        ));
+        ),);
         continue;
       }
       
@@ -86,7 +86,7 @@ class ReminderReconciliationPlanner {
           type: ReconciliationOperationType.preserve,
           reason: ReconciliationReasonCode.occurrenceIdentityMatched,
           localNotificationId: persisted.localNotificationId,
-        ));
+        ),);
       } else {
         // If it's a future reminder that is not in the candidate list and not superseded/cancelled explicitly,
         // it means the rule generated different candidates (e.g. date shifted). We supersede it.
@@ -94,7 +94,7 @@ class ReminderReconciliationPlanner {
           reminder: persisted,
           type: ReconciliationOperationType.supersede,
           reason: ReconciliationReasonCode.ruleSupersededAndOccurrenceFuture,
-        ));
+        ),);
       }
     }
 
@@ -124,7 +124,7 @@ class ReminderReconciliationPlanner {
           type: ReconciliationOperationType.insert,
           reason: ReconciliationReasonCode.candidateMissingFromPersistence,
           localNotificationId: assignedId,
-        ));
+        ),);
       }
     }
 

@@ -2,15 +2,6 @@ import 'package:tekmerion/src/features/reminder/domain/notification_permission_s
 import 'package:tekmerion/src/features/reminder/domain/notification_scheduling_state.dart';
 
 class NotificationScheduleRequest {
-  final int notificationId;
-  final String reminderId;
-  final String agreementId;
-  final String obligationId;
-  final DateTime scheduledUtcInstant;
-  final String timezoneIdentifier;
-  final String title;
-  final String body;
-  final Map<String, String> payloadData;
 
   const NotificationScheduleRequest({
     required this.notificationId,
@@ -23,6 +14,15 @@ class NotificationScheduleRequest {
     required this.body,
     required this.payloadData,
   });
+  final int notificationId;
+  final String reminderId;
+  final String agreementId;
+  final String obligationId;
+  final DateTime scheduledUtcInstant;
+  final String timezoneIdentifier;
+  final String title;
+  final String body;
+  final Map<String, String> payloadData;
 }
 
 abstract class LocalNotificationAdapter {

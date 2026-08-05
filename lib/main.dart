@@ -18,6 +18,8 @@ import 'src/features/agreement/data/sqlite_agreement_repository.dart';
 import 'src/features/agreement/presentation/file_picker_adapter.dart';
 import 'src/features/clause/data/sqlite_clause_repository.dart';
 import 'src/features/obligation/data/sqlite_obligation_repository.dart';
+import 'src/features/reminder/application/reminder_view_service.dart';
+import 'src/features/reminder/infrastructure/sqlite_reminder_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +72,18 @@ void main() async {
     pdfGenerator: RecordPdfGenerator(),
   );
 
+  final reminderRepository = SqliteReminderRepository(
+    (_) async => db,
+    'tekmerion.db',
+  );
+
+  final reminderViewService = ReminderViewService(
+    reminderRepository: reminderRepository,
+    agreementRepository: agreementRepository,
+    obligationRepository: obligationRepository,
+    clauseRepository: clauseRepository,
+  );
+
   runApp(
     TekmerionApp(
       importService: importService,
@@ -81,6 +95,7 @@ void main() async {
       exportService: exportService,
       exportPackageRepository: exportPackageRepository,
       exportShareAdapter: exportShareAdapter,
+      reminderViewService: reminderViewService,
     ),
   );
 }

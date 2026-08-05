@@ -18,6 +18,13 @@ enum ReconciliationReasonCode {
 }
 
 class ReconciliationOperation {
+
+  const ReconciliationOperation({
+    required this.reminder,
+    required this.type,
+    required this.reason,
+    this.localNotificationId,
+  });
   final ReminderInstance reminder;
   final ReconciliationOperationType type;
   final ReconciliationReasonCode reason;
@@ -26,19 +33,12 @@ class ReconciliationOperation {
   /// null if it is not applicable (e.g. cancelled/superseded). For preserve and leaveHistoricalUnchanged,
   /// this should match the persisted id.
   final int? localNotificationId;
-
-  const ReconciliationOperation({
-    required this.reminder,
-    required this.type,
-    required this.reason,
-    this.localNotificationId,
-  });
 }
 
 class ReconciliationPlan {
-  final List<ReconciliationOperation> operations;
 
   const ReconciliationPlan(this.operations);
+  final List<ReconciliationOperation> operations;
 
   Iterable<ReconciliationOperation> get inserts =>
       operations.where((op) => op.type == ReconciliationOperationType.insert);

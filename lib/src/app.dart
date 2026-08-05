@@ -9,6 +9,7 @@ import 'features/export/application/record_package_export_service.dart';
 import 'features/export/domain/export_package_repository.dart';
 import 'features/obligation/domain/obligation_repository.dart';
 import 'features/record/application/complete_obligation_service.dart';
+import 'features/reminder/application/reminder_view_service.dart';
 import 'features/timeline/application/agreement_timeline_service.dart';
 
 class TekmerionApp extends StatelessWidget {
@@ -23,6 +24,7 @@ class TekmerionApp extends StatelessWidget {
     required this.exportService,
     required this.exportPackageRepository,
     required this.exportShareAdapter,
+    required this.reminderViewService,
   });
 
   final AgreementImportService importService;
@@ -34,6 +36,7 @@ class TekmerionApp extends StatelessWidget {
   final RecordPackageExportService exportService;
   final ExportPackageRepository exportPackageRepository;
   final ExportShareAdapter exportShareAdapter;
+  final ReminderViewService reminderViewService;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +68,7 @@ class TekmerionApp extends StatelessWidget {
         exportService: exportService,
         exportPackageRepository: exportPackageRepository,
         exportShareAdapter: exportShareAdapter,
+        reminderViewService: reminderViewService,
       ),
     );
   }

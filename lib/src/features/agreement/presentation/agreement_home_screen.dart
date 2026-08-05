@@ -8,6 +8,9 @@ import 'package:tekmerion/src/features/export/presentation/record_package_export
 import 'package:tekmerion/src/features/obligation/domain/obligation_repository.dart';
 import 'package:tekmerion/src/features/obligation/presentation/obligations_list_screen.dart';
 import 'package:tekmerion/src/features/record/application/complete_obligation_service.dart';
+import 'package:tekmerion/src/features/reminder/application/reminder_view_service.dart';
+import 'package:tekmerion/src/features/reminder/presentation/screens/today_reminders_screen.dart';
+import 'package:tekmerion/src/features/reminder/presentation/screens/upcoming_reminders_screen.dart';
 import 'package:tekmerion/src/features/timeline/application/agreement_timeline_service.dart';
 import 'package:tekmerion/src/features/timeline/presentation/agreement_timeline_screen.dart';
 
@@ -35,6 +38,7 @@ class AgreementHomeScreen extends StatefulWidget {
     required this.exportService,
     required this.exportPackageRepository,
     required this.exportShareAdapter,
+    required this.reminderViewService,
   });
 
   final AgreementImportService importService;
@@ -46,6 +50,7 @@ class AgreementHomeScreen extends StatefulWidget {
   final RecordPackageExportService exportService;
   final ExportPackageRepository exportPackageRepository;
   final ExportShareAdapter exportShareAdapter;
+  final ReminderViewService reminderViewService;
 
   @override
   State<AgreementHomeScreen> createState() => _AgreementHomeScreenState();
@@ -280,6 +285,37 @@ class _AgreementHomeScreenState extends State<AgreementHomeScreen> {
                   },
                   icon: const Icon(Icons.list_alt),
                   label: const Text('View Obligations'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => TodayRemindersScreen(
+                          viewService: widget.reminderViewService,
+                          gracePeriod: const Duration(days: 1),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.notifications_active),
+                  label: const Text("Today's Reminders"),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => UpcomingRemindersScreen(
+                          viewService: widget.reminderViewService,
+                          gracePeriod: const Duration(days: 1),
+                          daysHorizon: 30,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.event_note),
+                  label: const Text('Upcoming Reminders'),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(

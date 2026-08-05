@@ -51,7 +51,16 @@
 - Implemented and tested: notification-state separation
 - Deferred: reconciliation, operating-system notification scheduling, Today and Upcoming UI, Android manual verification
 
-- **Phase 1I implementation and functional audit checkpoint**
+- **Phase 1J-C: System Reconciliation & Notification Translation**
+- Implemented and tested: Reconciliation algorithm to coalesce concurrency.
+- Implemented and tested: Collision-resistant, deterministic 31-bit Android-safe notification ID generation derived from occurrence keys.
+- Implemented and tested: Secure transaction boundaries over Reminder and Timeline domains.
+
+- **Phase 1J-D: Today and Upcoming UI**
+- Implemented and tested: `ReminderTemporalStatusResolver` to derive time-dependent statuses (`dueToday`, `overdue`, `upcoming`, etc.).
+- Implemented and tested: `ReminderViewService` that projects `ReminderInstance` with domain facts (`Agreement`, `Obligation`, `Clause`) into `ReminderCardViewModel`.
+- Implemented and tested: `TodayRemindersScreen` and `UpcomingRemindersScreen` providing filtered views.
+- Implemented and tested: `ReminderCard` displaying contextual metadata and actionable intents.
 - Implemented and tested: Record Package generation, cryptographic staging, human-readable PDF, schema validation.
 - Implemented and tested: UI integration for triggering export, handling stream lifecycles, and invoking native share intents.
 - Implemented and tested: Large-file benchmarking

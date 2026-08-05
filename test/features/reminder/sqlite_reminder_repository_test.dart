@@ -119,7 +119,7 @@ void main() {
       final occurred = DateTime.now().toUtc().add(const Duration(days: 1));
 
       Future<void> assertTransition(ReminderState targetState,
-          DateTime? Function(ReminderInstance) getTimestamp) async {
+          DateTime? Function(ReminderInstance) getTimestamp,) async {
         final id = 'r_${targetState.name}';
         final r = createTestReminder(id: id, state: ReminderState.scheduled);
         await repository.insertIfAbsent(r);
@@ -154,25 +154,25 @@ void main() {
       test(
           'acknowledged writes acknowledged_at',
           () => assertTransition(
-              ReminderState.acknowledged, (r) => r.acknowledgedAt));
+              ReminderState.acknowledged, (r) => r.acknowledgedAt,),);
       test(
           'completed writes completed_at',
           () =>
-              assertTransition(ReminderState.completed, (r) => r.completedAt));
+              assertTransition(ReminderState.completed, (r) => r.completedAt),);
       test(
           'dismissed writes dismissed_at',
           () =>
-              assertTransition(ReminderState.dismissed, (r) => r.dismissedAt));
+              assertTransition(ReminderState.dismissed, (r) => r.dismissedAt),);
       test(
           'cancelled writes cancelled_at',
           () =>
-              assertTransition(ReminderState.cancelled, (r) => r.cancelledAt));
+              assertTransition(ReminderState.cancelled, (r) => r.cancelledAt),);
       test(
           'superseded writes superseded_at',
           () => assertTransition(
-              ReminderState.superseded, (r) => r.supersededAt));
+              ReminderState.superseded, (r) => r.supersededAt,),);
       test('expired writes expired_at',
-          () => assertTransition(ReminderState.expired, (r) => r.expiredAt));
+          () => assertTransition(ReminderState.expired, (r) => r.expiredAt),);
     });
 
     test('transitionState fails if current state does not match', () async {
@@ -204,18 +204,18 @@ void main() {
 
       final fetched = await repository.getById('r1');
       expect(fetched!.notificationState,
-          equals(NotificationSchedulingState.scheduled));
+          equals(NotificationSchedulingState.scheduled),);
       expect(fetched.localNotificationId, equals(1001));
       expect(fetched.notificationScheduledAt, equals(scheduledAt));
     });
 
     test('cancelFutureForObligation cancels active reminders', () async {
       final r1 = createTestReminder(
-          id: 'r1', occurrenceKey: 'k1', state: ReminderState.scheduled);
+          id: 'r1', occurrenceKey: 'k1', state: ReminderState.scheduled,);
       final r2 = createTestReminder(
-          id: 'r2', occurrenceKey: 'k2', state: ReminderState.scheduled);
+          id: 'r2', occurrenceKey: 'k2', state: ReminderState.scheduled,);
       final r3 = createTestReminder(
-          id: 'r3', occurrenceKey: 'k3', state: ReminderState.completed);
+          id: 'r3', occurrenceKey: 'k3', state: ReminderState.completed,);
       await repository.insertBatchIfAbsent([r1, r2, r3]);
 
       final cancelledAt = DateTime.now().toUtc();
@@ -245,12 +245,12 @@ void main() {
           id: 'r1',
           occurrenceKey: 'k1',
           generationVersion: 1,
-          state: ReminderState.scheduled);
+          state: ReminderState.scheduled,);
       final r2 = createTestReminder(
           id: 'r2',
           occurrenceKey: 'k2',
           generationVersion: 2,
-          state: ReminderState.scheduled);
+          state: ReminderState.scheduled,);
       await repository.insertBatchIfAbsent([r1, r2]);
 
       final supersededAt = DateTime.now().toUtc();
@@ -278,18 +278,18 @@ void main() {
           occurrenceKey: 'k1',
           dueAt: now.subtract(const Duration(days: 1)),
           remindAt: now.subtract(const Duration(days: 2)),
-          state: ReminderState.scheduled); // past due
+          state: ReminderState.scheduled,); // past due
       final r2 = createTestReminder(
           id: 'r2',
           occurrenceKey: 'k2',
           dueAt: now.add(const Duration(days: 1)),
-          state: ReminderState.scheduled); // future
+          state: ReminderState.scheduled,); // future
       final r3 = createTestReminder(
           id: 'r3',
           occurrenceKey: 'k3',
           dueAt: now.subtract(const Duration(days: 1)),
           remindAt: now.subtract(const Duration(days: 2)),
-          state: ReminderState.completed); // past due but completed
+          state: ReminderState.completed,); // past due but completed
 
       await repository.insertBatchIfAbsent([r1, r2, r3]);
 

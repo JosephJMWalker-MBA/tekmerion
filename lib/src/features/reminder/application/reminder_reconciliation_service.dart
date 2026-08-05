@@ -15,13 +15,20 @@ enum ReconciliationResultType {
 }
 
 class ReconciliationResult {
-  final ReconciliationResultType type;
-  final String? errorMessage;
 
   const ReconciliationResult(this.type, {this.errorMessage});
+  final ReconciliationResultType type;
+  final String? errorMessage;
 }
 
 class ReminderReconciliationService {
+
+  ReminderReconciliationService({
+    required this.repository,
+    required this.planner,
+    required this.notificationAdapter,
+    required this.inputsProvider,
+  });
   final ReminderRepository repository;
   final ReminderReconciliationPlanner planner;
   final LocalNotificationAdapter notificationAdapter;
@@ -30,13 +37,6 @@ class ReminderReconciliationService {
   // For the sake of the domain service without hardcoding missing obligation repos,
   // we take a provider function that yields the fresh inputs.
   final Future<ReconciliationInputs> Function() inputsProvider;
-
-  ReminderReconciliationService({
-    required this.repository,
-    required this.planner,
-    required this.notificationAdapter,
-    required this.inputsProvider,
-  });
 
   bool _isReconciling = false;
   bool _rerunRequested = false;
@@ -202,13 +202,6 @@ class ReminderReconciliationService {
 }
 
 class ReconciliationInputs {
-  final Iterable<ReminderInstance> persistedReminders;
-  final Iterable<ReminderInstance> candidateReminders;
-  final DateTime currentUtc;
-  final DateTime windowStartUtc;
-  final DateTime windowEndUtc;
-  final Set<String> fulfilledObligationIds;
-  final Set<String> supersededScheduleRuleIds;
 
   const ReconciliationInputs({
     required this.persistedReminders,
@@ -219,4 +212,11 @@ class ReconciliationInputs {
     required this.fulfilledObligationIds,
     required this.supersededScheduleRuleIds,
   });
+  final Iterable<ReminderInstance> persistedReminders;
+  final Iterable<ReminderInstance> candidateReminders;
+  final DateTime currentUtc;
+  final DateTime windowStartUtc;
+  final DateTime windowEndUtc;
+  final Set<String> fulfilledObligationIds;
+  final Set<String> supersededScheduleRuleIds;
 }

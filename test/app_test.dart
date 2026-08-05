@@ -8,6 +8,7 @@ import 'package:tekmerion/src/features/export/application/record_package_export_
 import 'package:tekmerion/src/features/export/domain/export_package_repository.dart';
 import 'package:tekmerion/src/features/obligation/domain/obligation_repository.dart';
 import 'package:tekmerion/src/features/record/application/complete_obligation_service.dart';
+import 'package:tekmerion/src/features/reminder/application/reminder_view_service.dart';
 import 'package:tekmerion/src/features/timeline/application/agreement_timeline_service.dart';
 
 class FakeAgreementImportService implements AgreementImportService {
@@ -55,6 +56,11 @@ class FakeExportShareAdapter implements ExportShareAdapter {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class FakeReminderViewService implements ReminderViewService {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   testWidgets('home screen presents the agreement-centered frozen loop',
       (WidgetTester tester) async {
@@ -67,6 +73,7 @@ void main() {
     final mockExportService = FakeRecordPackageExportService();
     final mockExportRepo = FakeExportPackageRepository();
     final mockExportShareAdapter = FakeExportShareAdapter();
+    final mockReminderViewService = FakeReminderViewService();
 
     await tester.pumpWidget(
       TekmerionApp(
@@ -79,6 +86,7 @@ void main() {
         exportService: mockExportService,
         exportPackageRepository: mockExportRepo,
         exportShareAdapter: mockExportShareAdapter,
+        reminderViewService: mockReminderViewService,
       ),
     );
 

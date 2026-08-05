@@ -50,7 +50,7 @@ class ReminderEngine {
         rule.startAt.day,
         rule.startAt.hour,
         rule.startAt.minute,
-        rule.startAt.second);
+        rule.startAt.second,);
 
     if (rule.ruleType == ScheduleRuleType.oneTime) {
       occurrences.add(localStart);
@@ -77,7 +77,7 @@ class ReminderEngine {
         }
 
         current = tz.TZDateTime(location, nextYear, nextMonth, nextDay,
-            localStart.hour, localStart.minute, localStart.second);
+            localStart.hour, localStart.minute, localStart.second,);
       }
     } else if (rule.ruleType == ScheduleRuleType.intervalDays) {
       final intervalDays = int.tryParse(rule.recurrenceExpression ?? '1') ?? 1;
@@ -100,7 +100,7 @@ class ReminderEngine {
       // Ensure we get a standard core DateTime in UTC, not a TZDateTime.
       final occUtc = DateTime.fromMillisecondsSinceEpoch(
           occLocal.millisecondsSinceEpoch,
-          isUtc: true);
+          isUtc: true,);
 
       if (occUtc.isBefore(windowStart)) {
         continue;
@@ -139,7 +139,7 @@ class ReminderEngine {
   }
 
   static String _generateOccurrenceKey(
-      String scheduleRuleId, DateTime dueAtUtc, int generationVersion) {
+      String scheduleRuleId, DateTime dueAtUtc, int generationVersion,) {
     final payload =
         '$scheduleRuleId|${dueAtUtc.toIso8601String()}|$generationVersion';
     final bytes = utf8.encode(payload);

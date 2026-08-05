@@ -14,7 +14,7 @@ class NotificationIdGenerator {
     
     // Take the first 4 bytes and interpret them as a big-endian 32-bit integer
     final firstFour = digest.bytes.sublist(0, 4);
-    var rawInt = (firstFour[0] << 24) |
+    final rawInt = (firstFour[0] << 24) |
                  (firstFour[1] << 16) |
                  (firstFour[2] << 8) |
                  firstFour[3];

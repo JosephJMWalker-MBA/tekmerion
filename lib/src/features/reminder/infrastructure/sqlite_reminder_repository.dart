@@ -91,7 +91,7 @@ class SqliteReminderRepository implements ReminderRepository {
 
   @override
   Future<List<ReminderInstance>> getForScheduleRule(
-      String scheduleRuleId) async {
+      String scheduleRuleId,) async {
     final db = await _getDb();
     final results = await db.query(
       'reminders',
@@ -183,7 +183,7 @@ class SqliteReminderRepository implements ReminderRepository {
 
     if (count == 0) {
       throw StateError(
-          'Invalid state transition from ${expectedCurrentState.name} to ${targetState.name} for reminder $reminderId');
+          'Invalid state transition from ${expectedCurrentState.name} to ${targetState.name} for reminder $reminderId',);
     }
   }
 
