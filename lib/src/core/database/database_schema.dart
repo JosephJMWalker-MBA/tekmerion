@@ -89,15 +89,40 @@ class DatabaseSchema {
   static const String createRemindersTable = '''
     CREATE TABLE reminders (
       id TEXT PRIMARY KEY,
+      agreement_id TEXT NOT NULL,
       obligation_id TEXT NOT NULL,
-      generated_from_rule_id TEXT,
-      scheduled_for TEXT NOT NULL,
+      schedule_rule_id TEXT NOT NULL,
+      occurrence_key TEXT NOT NULL,
+      due_at TEXT NOT NULL,
+      remind_at TEXT NOT NULL,
+      timezone TEXT NOT NULL,
       state TEXT NOT NULL,
+      generation_version INTEGER NOT NULL,
+      generated_at TEXT NOT NULL,
+      acknowledged_at TEXT,
+      dismissed_at TEXT,
+      completed_at TEXT,
+      cancelled_at TEXT,
+      superseded_at TEXT,
+      expired_at TEXT,
+      local_notification_id INTEGER,
+      notification_state TEXT NOT NULL,
+      notification_attempted_at TEXT,
+      notification_scheduled_at TEXT,
+      notification_error_code TEXT,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL,
+      provenance_summary TEXT NOT NULL,
       created_at TEXT NOT NULL,
-      completed_by_record_entry_id TEXT,
-      FOREIGN KEY (obligation_id) REFERENCES obligations (id) ON DELETE CASCADE,
-      FOREIGN KEY (generated_from_rule_id) REFERENCES schedule_rules (id) ON DELETE SET NULL,
-      FOREIGN KEY (completed_by_record_entry_id) REFERENCES record_entries (id) ON DELETE SET NULL
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (agreement_id) REFERENCES agreements (id) ON DELETE RESTRICT,
+      FOREIGN KEY (obligation_id) REFERENCES obligations (id) ON DELETE RESTRICT,
+      FOREIGN KEY (schedule_rule_id) REFERENCES schedule_rules (id) ON DELETE CASCADE,
+      UNIQUE (schedule_rule_id, occurrence_key),
+      CHECK(remind_at <= due_at),
+      CHECK(generation_version >= 1),
+      CHECK(state IN ('scheduled', 'acknowledged', 'dismissed', 'completed', 'cancelled', 'superseded', 'expired')),
+      CHECK(notification_state IN ('notRequested', 'pending', 'scheduled', 'permissionDenied', 'failed', 'cancelled'))
     );
   ''';
 
@@ -191,7 +216,27 @@ class DatabaseSchema {
   ''';
 
   static const String indexObligationReminders = '''
-    CREATE INDEX idx_obligation_reminders ON reminders (obligation_id, scheduled_for);
+    CREATE INDEX idx_obligation_reminders ON reminders (obligation_id, due_at);
+  ''';
+
+  static const String indexRemindersAgreement = '''
+    CREATE INDEX idx_reminders_agreement ON reminders (agreement_id);
+  ''';
+
+  static const String indexRemindersRule = '''
+    CREATE INDEX idx_reminders_rule ON reminders (schedule_rule_id);
+  ''';
+
+  static const String indexRemindersState = '''
+    CREATE INDEX idx_reminders_state ON reminders (state);
+  ''';
+
+  static const String indexRemindersRemindAt = '''
+    CREATE INDEX idx_reminders_remind_at ON reminders (remind_at);
+  ''';
+
+  static const String indexRemindersDueAt = '''
+    CREATE INDEX idx_reminders_due_at ON reminders (due_at);
   ''';
 
   static const String indexEvidenceHashLookup = '''
@@ -231,6 +276,11 @@ class DatabaseSchema {
     createExportPackagesTable,
     indexRecordTimeline,
     indexObligationReminders,
+    indexRemindersAgreement,
+    indexRemindersRule,
+    indexRemindersState,
+    indexRemindersRemindAt,
+    indexRemindersDueAt,
     indexEvidenceHashLookup,
     indexCorrectionRelationships,
     indexChainOrdering,
