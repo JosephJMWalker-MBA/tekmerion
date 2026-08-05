@@ -22,10 +22,22 @@ import 'src/features/reminder/application/local_notification_adapter.dart';
 import 'src/features/reminder/application/reminder_reconciliation_service.dart';
 import 'src/features/reminder/application/reminder_view_service.dart';
 import 'src/features/reminder/domain/reminder_reconciliation_planner.dart';
+import 'src/features/reminder/infrastructure/flutter_local_notification_adapter.dart';
 import 'src/features/reminder/infrastructure/sqlite_reminder_repository.dart';
+
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
+
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  await flutterLocalNotificationsPlugin.initialize(
+    const InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+    ),
+  );
 
   final evidenceStorage = LocalEvidenceStorage(
     getRootDirectory: () => getApplicationDocumentsDirectory(),
@@ -90,7 +102,7 @@ void main() async {
   final reminderReconciliationService = ReminderReconciliationService(
     repository: reminderRepository,
     planner: ReminderReconciliationPlanner(),
-    notificationAdapter: DummyLocalNotificationAdapter(),
+    notificationAdapter: FlutterLocalNotificationAdapter(flutterLocalNotificationsPlugin),
     inputsProvider: () async {
       return ReconciliationInputs(
         persistedReminders: [],

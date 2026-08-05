@@ -3,6 +3,7 @@ import 'package:tekmerion/src/features/reminder/application/reminder_reconciliat
 import 'package:tekmerion/src/features/reminder/application/reminder_view_service.dart';
 import 'package:tekmerion/src/features/reminder/infrastructure/sqlite_reminder_repository.dart';
 import 'package:tekmerion/src/features/reminder/presentation/models/reminder_card_view_model.dart';
+import 'package:tekmerion/src/features/reminder/presentation/widgets/notification_permission_banner.dart';
 import 'package:tekmerion/src/features/reminder/presentation/widgets/reminder_card.dart';
 
 class UpcomingRemindersScreen extends StatefulWidget {
@@ -144,25 +145,35 @@ class _UpcomingRemindersScreenState extends State<UpcomingRemindersScreen> {
           }
 
           final viewModels = snapshot.data!;
-          return ListView.builder(
-            itemCount: viewModels.length,
-            itemBuilder: (context, index) {
-              final vm = viewModels[index];
-              return ReminderCard(
-                viewModel: vm,
-                onAcknowledge:
-                    vm.canAcknowledge ? () => _handleAcknowledge(vm) : null,
-                onDismiss: vm.canDismiss ? () => _handleDismiss(vm) : null,
-                onComplete: vm.canComplete
-                    ? () {
-                        _handleComplete(vm);
-                      }
-                    : null,
-              );
-            },
+          return Column(
+            children: [
+              NotificationPermissionBanner(
+                reconciliationService: widget.reconciliationService,
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: viewModels.length,
+                  itemBuilder: (context, index) {
+                    final vm = viewModels[index];
+                    return ReminderCard(
+                      viewModel: vm,
+                      onAcknowledge:
+                          vm.canAcknowledge ? () => _handleAcknowledge(vm) : null,
+                      onDismiss: vm.canDismiss ? () => _handleDismiss(vm) : null,
+                      onComplete: vm.canComplete
+                          ? () {
+                              _handleComplete(vm);
+                            }
+                          : null,
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 }
+

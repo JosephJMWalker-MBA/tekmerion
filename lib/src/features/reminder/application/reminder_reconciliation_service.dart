@@ -39,6 +39,16 @@ class ReminderReconciliationService {
   bool _isReconciling = false;
   bool _rerunRequested = false;
 
+  Future<NotificationPermissionState> inspectPermissionState() =>
+      notificationAdapter.inspectPermissionState();
+
+  Future<NotificationPermissionState> requestPermission() async {
+    final state = await notificationAdapter.requestPermission();
+    // A change in permission means we should trigger reconciliation to schedule missing ones.
+    unawaited(triggerReconciliation());
+    return state;
+  }
+
   /// Trigger a reconciliation run. Concurrent calls will coalesce.
   Future<ReconciliationResult> triggerReconciliation() async {
     if (_isReconciling) {

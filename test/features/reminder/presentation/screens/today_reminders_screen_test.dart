@@ -1,3 +1,5 @@
+import 'package:tekmerion/src/features/reminder/domain/notification_permission_state.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tekmerion/src/features/agreement/domain/agreement_repository.dart';
@@ -64,6 +66,16 @@ class DummyReminderReconciliationService
   @override
   Future<ReconciliationResult> triggerReconciliation() async {
     return const ReconciliationResult(ReconciliationResultType.completed);
+  }
+
+  @override
+  Future<NotificationPermissionState> inspectPermissionState() async {
+    return NotificationPermissionState.granted;
+  }
+
+  @override
+  Future<NotificationPermissionState> requestPermission() async {
+    return NotificationPermissionState.granted;
   }
 
   @override

@@ -63,6 +63,13 @@ We will adopt a pure, functional approach to reminder candidate generation.
 - structured `LocalNotificationAdapter` boundary
 
 **Deferred:**
-- actual operating-system notification plugin (e.g. `flutter_local_notifications`)
-- Today and Upcoming UI
 - Android manual verification
+
+## Phase 1J-E Android Local Notification Integration
+
+We have adopted `flutter_local_notifications` for OS-level integration.
+
+1. **Exact-Alarm Policy**: We use inexact scheduling (`ScheduleMode.inexactAllowWhileIdle` or `ScheduleMode.inexact`) exclusively. We do NOT request `SCHEDULE_EXACT_ALARM` or `USE_EXACT_ALARM` to avoid Play Store restrictions and battery-drain penalties. Android battery-saving policies (Doze mode, OEM restrictions) may delay delivery. Canonical reminder due dates remain preserved securely inside Tekmerion and are unaffected by delayed OS notifications.
+2. **Channel Configuration**: Notifications are sent via channel `tekmerion_reminders_v1` (Name: "Agreement reminders").
+3. **Permissions**: We target Android 13+ requiring `POST_NOTIFICATIONS`. The app never prompts for permissions automatically on startup or reconciliation. It waits for contextual user intent.
+4. **Resilience**: The manifest declares `RECEIVE_BOOT_COMPLETED` and the plugin's reboot receivers so OS reboots can attempt automatic rescheduling.
