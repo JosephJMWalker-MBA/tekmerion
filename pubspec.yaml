@@ -19,6 +19,10 @@ dependencies:
   intl: ^0.20.3
 
   meta: any
+  pdf: ^3.13.0
+  archive: ^4.0.9
+  share_plus: ^12.0.2
+  json_schema: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
