@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tekmerion/src/app.dart';
+import 'package:tekmerion/src/core/storage/evidence_storage.dart';
 import 'package:tekmerion/src/features/agreement/application/agreement_import_service.dart';
 import 'package:tekmerion/src/features/clause/domain/clause_repository.dart';
-import 'package:tekmerion/src/core/storage/evidence_storage.dart';
 import 'package:tekmerion/src/features/obligation/domain/obligation_repository.dart';
 import 'package:tekmerion/src/features/record/application/complete_obligation_service.dart';
 import 'package:tekmerion/src/features/timeline/application/agreement_timeline_service.dart';
@@ -48,14 +47,16 @@ void main() {
     final mockTimelineService = FakeAgreementTimelineService();
     final mockObligationRepo = FakeObligationRepository();
 
-    await tester.pumpWidget(TekmerionApp(
-      importService: mockImportService,
-      clauseRepository: mockClauseRepo,
-      obligationRepository: mockObligationRepo,
-      evidenceStorage: mockStorage,
-      completeObligationService: mockCompleteObligationService,
-      timelineService: mockTimelineService,
-    ));
+    await tester.pumpWidget(
+      TekmerionApp(
+        importService: mockImportService,
+        clauseRepository: mockClauseRepo,
+        obligationRepository: mockObligationRepo,
+        evidenceStorage: mockStorage,
+        completeObligationService: mockCompleteObligationService,
+        timelineService: mockTimelineService,
+      ),
+    );
 
     expect(find.text('What does this agreement require now?'), findsOneWidget);
     expect(find.text('Import Lease'), findsOneWidget);

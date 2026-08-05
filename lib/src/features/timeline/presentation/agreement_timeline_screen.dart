@@ -228,7 +228,8 @@ class _AgreementTimelineScreenState extends State<AgreementTimelineScreen> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
-            '${timeFormat.format(event.recordedAt.toLocal())} • ${event.summary}'),
+          '${timeFormat.format(event.recordedAt.toLocal())} • ${event.summary}',
+        ),
         trailing: event.integrityState == TimelineIntegrityState.verified
             ? const Tooltip(
                 message: 'Verified',

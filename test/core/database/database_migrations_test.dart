@@ -58,7 +58,7 @@ void main() {
     test('migration version is recorded', () async {
       db = await DatabaseMigrations.openAndMigrate(dbPath);
       final version = await db.getVersion();
-      expect(version, equals(3));
+      expect(version, equals(4));
     });
 
     test('foreign keys are enforced', () async {
@@ -108,6 +108,9 @@ void main() {
         onCreate: (db, version) async {
           // Re-create exactly as v1 (simulated by running only v1 migrations)
           for (final statement in DatabaseSchema.phase1Migration) {
+            if (statement.contains('CREATE TABLE export_packages')) {
+              continue;
+            }
             if (statement.contains('CREATE TABLE clauses')) {
               await db.execute('''
                 CREATE TABLE clauses (

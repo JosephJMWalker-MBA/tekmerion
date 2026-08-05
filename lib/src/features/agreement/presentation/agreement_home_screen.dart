@@ -238,7 +238,7 @@ class _AgreementHomeScreenState extends State<AgreementHomeScreen> {
                 FilledButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
+                      MaterialPageRoute<void>(
                         builder: (_) => AgreementViewerScreen(
                           agreement: _result!.agreement,
                           version: _result!.version,
@@ -257,7 +257,7 @@ class _AgreementHomeScreenState extends State<AgreementHomeScreen> {
                 OutlinedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
+                      MaterialPageRoute<void>(
                         builder: (_) => ObligationsListScreen(
                           agreement: _result!.agreement,
                           agreementVersionId: _result!.version.id,
@@ -275,7 +275,7 @@ class _AgreementHomeScreenState extends State<AgreementHomeScreen> {
                 OutlinedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
+                      MaterialPageRoute<void>(
                         builder: (_) => AgreementTimelineScreen(
                           agreement: _result!.agreement,
                           timelineService: widget.timelineService,

@@ -43,7 +43,6 @@ class _AgreementViewerScreenState extends State<AgreementViewerScreen> {
   ViewerUiState _state = ViewerUiState.verifying;
   String? _localPath;
   int _currentPage = 1;
-  int _totalPages = 0;
 
   @override
   void initState() {
@@ -91,7 +90,7 @@ class _AgreementViewerScreenState extends State<AgreementViewerScreen> {
     if (_state != ViewerUiState.ready) return;
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (_) => ManualClauseScreen(
           agreement: widget.agreement,
           version: widget.version,
@@ -224,9 +223,7 @@ class _AgreementViewerScreenState extends State<AgreementViewerScreen> {
           params: PdfViewerParams(
             onViewerReady: (document, controller) {
               if (mounted) {
-                setState(() {
-                  _totalPages = document.pages.length;
-                });
+                setState(() {});
               }
             },
             onPageChanged: (pageNumber) {

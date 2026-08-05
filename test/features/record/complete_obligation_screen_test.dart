@@ -61,8 +61,8 @@ void main() {
 
   testWidgets('CompleteObligationScreen calls service on submit',
       (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(1080, 2400);
-    tester.binding.window.devicePixelRatioTestValue = 3.0;
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
 
     final mockService = MockCompleteObligationService();
 
@@ -104,6 +104,7 @@ void main() {
     // Should pop
     expect(find.text('Complete Obligation'), findsNothing);
 
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
   });
 }

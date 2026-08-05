@@ -6,7 +6,7 @@ class DatabaseMigrations {
   static Future<Database> openAndMigrate(String path) async {
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onConfigure: (db) async {
         // Enforce foreign keys for all connections
         await db.execute('PRAGMA foreign_keys = ON');
@@ -65,6 +65,10 @@ class DatabaseMigrations {
           await db.execute('DROP TABLE obligations_old');
 
           await db.execute('PRAGMA foreign_keys = ON');
+        }
+        if (oldVersion < 4) {
+          // Add export_packages table
+          await db.execute(DatabaseSchema.createExportPackagesTable);
         }
       },
     );

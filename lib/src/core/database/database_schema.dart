@@ -179,6 +179,8 @@ class DatabaseSchema {
       manifest_sha256 TEXT NOT NULL,
       managed_storage_identifier TEXT NOT NULL,
       generator_version TEXT NOT NULL,
+      completeness_state TEXT NOT NULL,
+      warning_count INTEGER NOT NULL,
       FOREIGN KEY (agreement_id) REFERENCES agreements (id) ON DELETE CASCADE
     );
   ''';

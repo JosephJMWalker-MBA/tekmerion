@@ -121,7 +121,7 @@ void main() {
 
   test('equal timestamps sort deterministically by priority then id', () async {
     final now = DateTime.now().toUtc();
-    
+
     await db.insert('agreements', {
       'id': 'a2',
       'title': 'Test',
@@ -169,12 +169,16 @@ void main() {
     });
 
     final events = await repo.getTimelineForAgreement('a2');
-    
-    final completionEvents = events.where((e) => e.eventType == TimelineEventType.obligationCompleted).toList();
+
+    final completionEvents = events
+        .where((e) => e.eventType == TimelineEventType.obligationCompleted)
+        .toList();
     expect(completionEvents[0].id, 'r2_b_completed');
     expect(completionEvents[1].id, 'r2_a_completed');
 
-    final finalizeEvents = events.where((e) => e.eventType == TimelineEventType.recordFinalized).toList();
+    final finalizeEvents = events
+        .where((e) => e.eventType == TimelineEventType.recordFinalized)
+        .toList();
     expect(finalizeEvents[0].id, 'r2_b_finalized');
     expect(finalizeEvents[1].id, 'r2_a_finalized');
   });
@@ -188,7 +192,7 @@ void main() {
       'status': 'active',
       'created_at': now.toIso8601String(),
     });
-    
+
     await db.insert('evidence_assets', {
       'id': 'e1',
       'original_filename': 'receipt.jpg',
@@ -232,11 +236,12 @@ void main() {
     });
 
     final events = await repo.getTimelineForAgreement('a3');
-    
+
     final ids = events.map((e) => e.id).toSet();
     expect(ids.length, events.length);
 
-    final evEvent = events.firstWhere((e) => e.eventType == TimelineEventType.evidenceAttached);
+    final evEvent = events
+        .firstWhere((e) => e.eventType == TimelineEventType.evidenceAttached);
     expect(evEvent.sourceObjectType, 'EvidenceAsset');
     expect(evEvent.sourceObjectId, 'e1');
   });

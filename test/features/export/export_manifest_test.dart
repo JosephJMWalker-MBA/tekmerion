@@ -43,8 +43,10 @@ void main() {
       expect(json['schema_version'], '1.0.0');
       expect(json['package_id'], '123e4567-e89b-12d3-a456-426614174000');
       expect(json['generated_at'], '2026-08-04T12:00:00.000Z');
-      expect((json['generator'] as Map<String, dynamic>)['application'],
-          'Tekmerion',);
+      expect(
+        (json['generator'] as Map<String, dynamic>)['application'],
+        'Tekmerion',
+      );
       expect(json['disclaimers'], ['Disclaimer 1']);
     });
   });

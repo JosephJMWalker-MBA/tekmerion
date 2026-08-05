@@ -50,7 +50,6 @@ class _ManualClauseScreenState extends State<ManualClauseScreen> {
   late final TextEditingController _pageEndController;
 
   String? _errorMessage;
-  Clause? _draftClause;
 
   @override
   void initState() {
@@ -125,12 +124,12 @@ class _ManualClauseScreenState extends State<ManualClauseScreen> {
         });
 
         // Wait a brief moment to show success state
-        await Future.delayed(const Duration(milliseconds: 1000));
+        await Future<void>.delayed(const Duration(milliseconds: 1000));
 
         if (mounted) {
           // Push ObligationConfirmationScreen as replacement for ManualClauseScreen
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
+            MaterialPageRoute<void>(
               builder: (_) => ObligationConfirmationScreen(
                 agreement: widget.agreement,
                 version: widget.version,
