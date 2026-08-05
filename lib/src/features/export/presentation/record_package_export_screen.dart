@@ -125,13 +125,15 @@ class _RecordPackageExportScreenState extends State<RecordPackageExportScreen> {
     final file = File(_status.packageFilePath!);
     bool isReadableFile = false;
     try {
-      isReadableFile = file.existsSync() && file.statSync().type == FileSystemEntityType.file;
+      isReadableFile = file.existsSync() &&
+          file.statSync().type == FileSystemEntityType.file;
     } catch (_) {}
 
     if (!isReadableFile) {
       if (mounted) {
         setState(() {
-          _shareErrorMessage = 'The generated package file is missing. Please try generating again.';
+          _shareErrorMessage =
+              'The generated package file is missing. Please try generating again.';
         });
       }
       return;
@@ -263,9 +265,11 @@ class _RecordPackageExportScreenState extends State<RecordPackageExportScreen> {
               child: ListTile(
                 leading: const Icon(Icons.history),
                 title: Text(
-                    "Generated: ${_latestPriorExport!.generatedAt.toLocal().toString().split('.').first}",),
+                  "Generated: ${_latestPriorExport!.generatedAt.toLocal().toString().split('.').first}",
+                ),
                 subtitle: Text(
-                    "Completeness: ${_latestPriorExport!.completenessState}\nHash: ${_abbreviateHash(_latestPriorExport!.manifestSha256)}",),
+                  "Completeness: ${_latestPriorExport!.completenessState}\nHash: ${_abbreviateHash(_latestPriorExport!.manifestSha256)}",
+                ),
                 isThreeLine: true,
               ),
             ),
@@ -318,7 +322,10 @@ class _RecordPackageExportScreenState extends State<RecordPackageExportScreen> {
             'The Record Package could not be completed.',
             textAlign: TextAlign.center,
             style: TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red,),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -359,7 +366,10 @@ class _RecordPackageExportScreenState extends State<RecordPackageExportScreen> {
             _getStateDescription(_status.state),
             textAlign: TextAlign.center,
             style: const TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green,),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.green,
+            ),
           ),
           const SizedBox(height: 24),
           Card(
@@ -368,28 +378,40 @@ class _RecordPackageExportScreenState extends State<RecordPackageExportScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Filename',
-                      style: TextStyle(fontWeight: FontWeight.bold),),
+                  const Text(
+                    'Filename',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Text(filenameText),
                   const SizedBox(height: 12),
-                  const Text('Generated',
-                      style: TextStyle(fontWeight: FontWeight.bold),),
+                  const Text(
+                    'Generated',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Text(generatedAtText),
                   const SizedBox(height: 12),
-                  const Text('Size',
-                      style: TextStyle(fontWeight: FontWeight.bold),),
+                  const Text(
+                    'Size',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Text(_getFileSizeString(_status.packageFilePath)),
                   const SizedBox(height: 12),
-                  const Text('Manifest SHA-256',
-                      style: TextStyle(fontWeight: FontWeight.bold),),
+                  const Text(
+                    'Manifest SHA-256',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Text(_abbreviateHash(_latestPriorExport?.manifestSha256)),
                   const SizedBox(height: 12),
-                  const Text('Completeness',
-                      style: TextStyle(fontWeight: FontWeight.bold),),
+                  const Text(
+                    'Completeness',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Text(_latestPriorExport?.completenessState ?? ''),
                   const SizedBox(height: 12),
-                  const Text('Warnings',
-                      style: TextStyle(fontWeight: FontWeight.bold),),
+                  const Text(
+                    'Warnings',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Text("${_latestPriorExport?.warningCount ?? 0}"),
                 ],
               ),

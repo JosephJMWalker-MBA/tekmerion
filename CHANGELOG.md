@@ -44,4 +44,5 @@
 - **Phase 1I implementation and functional audit checkpoint**
 - Implemented and tested: Record Package generation, cryptographic staging, human-readable PDF, schema validation.
 - Implemented and tested: UI integration for triggering export, handling stream lifecycles, and invoking native share intents.
-- Deferred: Large-file benchmarking.
+- Implemented and tested: Large-file benchmarking
+- Operating Limit: Advisory warning only (macOS generation takes ~2.5s for 100MB, peak RSS ~380MB).

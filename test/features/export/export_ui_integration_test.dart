@@ -44,7 +44,8 @@ class FakeExportPackageRepository implements ExportPackageRepository {
   }
 
   Future<List<ExportPackage>> getPackagesForAgreement(
-      String agreementId,) async {
+    String agreementId,
+  ) async {
     return packages;
   }
 }
@@ -77,19 +78,21 @@ void main() {
 
     mockExportService = FakeExportService()..tempFile = tempZip;
     mockExportRepo = FakeExportPackageRepository();
-    mockExportRepo.packages.add(ExportPackage(
-      id: 'ep1',
-      agreementId: 'a1',
-      generatedAt: DateTime.now(),
-      format: 'ZIP',
-      filterParametersJson: '{}',
-      manifestSha256:
-          'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-      managedStorageIdentifier: tempZip.path,
-      generatorVersion: '1.0',
-      completenessState: 'complete',
-      warningCount: 0,
-    ),);
+    mockExportRepo.packages.add(
+      ExportPackage(
+        id: 'ep1',
+        agreementId: 'a1',
+        generatedAt: DateTime.now(),
+        format: 'ZIP',
+        filterParametersJson: '{}',
+        manifestSha256:
+            'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+        managedStorageIdentifier: tempZip.path,
+        generatorVersion: '1.0',
+        completenessState: 'complete',
+        warningCount: 0,
+      ),
+    );
     mockShareAdapter = FakeExportShareAdapter();
   });
 
@@ -141,7 +144,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-          mockShareAdapter.sharedFilePath, tempZip.path,);
+        mockShareAdapter.sharedFilePath,
+        tempZip.path,
+      );
     });
 
     testWidgets('idle -> generating -> failed -> retry -> completed',
@@ -161,8 +166,10 @@ void main() {
       // Failed
       await tester.pump(const Duration(milliseconds: 10));
       await tester.pump();
-      expect(find.text('The Record Package could not be completed.'),
-          findsOneWidget,);
+      expect(
+        find.text('The Record Package could not be completed.'),
+        findsOneWidget,
+      );
 
       // Retry (flip the mock)
       mockExportService.completeSuccessfully = true;

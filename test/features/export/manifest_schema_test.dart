@@ -297,7 +297,8 @@ void main() {
         recordRepo: fakes.FakeRecordRepository(),
         timelineRepo: fakes.FakeTimelineRepository(),
         evidenceStorage: fakes.FakeEvidenceStorage(
-            {'66666666-6666-6666-6666-666666666661': agreementBytes},),
+          {'66666666-6666-6666-6666-666666666661': agreementBytes},
+        ),
         exportRepo: fakes.FakeExportPackageRepository(),
         pdfGenerator: fakes.FakeRecordPdfGenerator(),
       );

@@ -46,7 +46,8 @@ class FakeExportPackageRepository implements ExportPackageRepository {
   }
 
   Future<List<ExportPackage>> getPackagesForAgreement(
-      String agreementId,) async {
+    String agreementId,
+  ) async {
     return packages;
   }
 }
@@ -79,19 +80,21 @@ void main() {
 
     mockExportService = FakeExportService()..tempFile = tempZip;
     mockExportRepo = FakeExportPackageRepository();
-    mockExportRepo.packages.add(ExportPackage(
-      id: 'ep1',
-      agreementId: 'a1',
-      generatedAt: DateTime.now(),
-      format: 'ZIP',
-      filterParametersJson: '{}',
-      manifestSha256:
-          'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-      managedStorageIdentifier: tempZip.path,
-      generatorVersion: '1.0',
-      completenessState: 'complete',
-      warningCount: 0,
-    ),);
+    mockExportRepo.packages.add(
+      ExportPackage(
+        id: 'ep1',
+        agreementId: 'a1',
+        generatedAt: DateTime.now(),
+        format: 'ZIP',
+        filterParametersJson: '{}',
+        manifestSha256:
+            'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+        managedStorageIdentifier: tempZip.path,
+        generatorVersion: '1.0',
+        completenessState: 'complete',
+        warningCount: 0,
+      ),
+    );
     mockShareAdapter = FakeExportShareAdapter();
   });
 
@@ -163,8 +166,11 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Generate Record Package'));
-      await tester.tap(find.text(
-          'Generate Record Package',),); // this should be disabled, thus ignored
+      await tester.tap(
+        find.text(
+          'Generate Record Package',
+        ),
+      ); // this should be disabled, thus ignored
       await tester.pump();
 
       final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
@@ -180,7 +186,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-          find.text('Export: Lease'), findsOneWidget,); // title is not literal
+        find.text('Export: Lease'),
+        findsOneWidget,
+      ); // title is not literal
 
       await tester.tap(find.text('Generate Record Package'));
       await tester.pumpAndSettle();
@@ -198,18 +206,20 @@ void main() {
     testWidgets('Short hash displays correctly without crashing',
         (WidgetTester tester) async {
       mockExportRepo.packages.clear();
-      mockExportRepo.packages.add(ExportPackage(
-        id: 'ep2',
-        agreementId: 'a1',
-        generatedAt: DateTime.now(),
-        format: 'ZIP',
-        filterParametersJson: '{}',
-        manifestSha256: 'short',
-        managedStorageIdentifier: '/fake/path/short.zip',
-        generatorVersion: '1.0',
-        completenessState: 'partial',
-        warningCount: 2,
-      ),);
+      mockExportRepo.packages.add(
+        ExportPackage(
+          id: 'ep2',
+          agreementId: 'a1',
+          generatedAt: DateTime.now(),
+          format: 'ZIP',
+          filterParametersJson: '{}',
+          manifestSha256: 'short',
+          managedStorageIdentifier: '/fake/path/short.zip',
+          generatorVersion: '1.0',
+          completenessState: 'partial',
+          warningCount: 2,
+        ),
+      );
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
@@ -249,9 +259,11 @@ void main() {
 
       expect(mockShareAdapter.sharedFilePath, isNull);
       expect(
-          find.text(
-              'The generated package file is missing. Please try generating again.',),
-          findsOneWidget,);
+        find.text(
+          'The generated package file is missing. Please try generating again.',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Share requires an explicit tap and receives verified ZIP path',
@@ -284,8 +296,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Your Record Package is ready.'), findsOneWidget);
-      expect(find.text('Could not share the Record Package. Please try again.'),
-          findsNothing,);
+      expect(
+        find.text('Could not share the Record Package. Please try again.'),
+        findsNothing,
+      );
     });
 
     testWidgets('Share failure displays calm feedback',
@@ -301,8 +315,10 @@ void main() {
       await tester.tap(find.text('Save or Share'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Could not share the Record Package. Please try again.'),
-          findsOneWidget,);
+      expect(
+        find.text('Could not share the Record Package. Please try again.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Export failure displays no success controls',
@@ -314,8 +330,10 @@ void main() {
       await tester.tap(find.text('Generate Record Package'));
       await tester.pumpAndSettle();
 
-      expect(find.text('The Record Package could not be completed.'),
-          findsOneWidget,);
+      expect(
+        find.text('The Record Package could not be completed.'),
+        findsOneWidget,
+      );
       expect(find.text('Save or Share'), findsNothing);
       expect(find.text('Retry'), findsOneWidget);
     });
@@ -357,25 +375,27 @@ void main() {
     testWidgets('Done returns to the previous screen',
         (WidgetTester tester) async {
       bool popped = false;
-      await tester.pumpWidget(MaterialApp(
-        home: Navigator(
-          onPopPage: (route, result) {
-            popped = true;
-            return route.didPop(result);
-          },
-          pages: [
-            const MaterialPage(child: Text('Home')),
-            MaterialPage(
-              child: RecordPackageExportScreen(
-                agreementId: 'a1',
-                exportService: mockExportService,
-                exportPackageRepository: mockExportRepo,
-                exportShareAdapter: mockShareAdapter,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Navigator(
+            onPopPage: (route, result) {
+              popped = true;
+              return route.didPop(result);
+            },
+            pages: [
+              const MaterialPage(child: Text('Home')),
+              MaterialPage(
+                child: RecordPackageExportScreen(
+                  agreementId: 'a1',
+                  exportService: mockExportService,
+                  exportPackageRepository: mockExportRepo,
+                  exportShareAdapter: mockShareAdapter,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),);
+      );
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Generate Record Package'));
