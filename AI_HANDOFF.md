@@ -71,12 +71,12 @@
 - Schedule rule export into `data/schedule-rules.json`.
 - Cryptographic source integrity failing closed on invalid sources.
 - Generation of human-readable presentation PDF (`record.pdf`) from manifest facts.
+- UI integration for triggering export, handling loading states, error boundaries, and invoking native share sheets.
 
 **Implemented but not manually verified:**
 - Complete agreement chain processing on real devices.
 
 **Deferred:**
-- UI integration for triggering export and handling loading states.
 - Large-file benchmarking and performance profiling for export generation.
 - Full JSON Schema Draft 2020-12 validator support in Dart (currently using basic validation).
 

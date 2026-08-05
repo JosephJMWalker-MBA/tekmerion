@@ -3,6 +3,9 @@ import 'package:tekmerion/src/app.dart';
 import 'package:tekmerion/src/core/storage/evidence_storage.dart';
 import 'package:tekmerion/src/features/agreement/application/agreement_import_service.dart';
 import 'package:tekmerion/src/features/clause/domain/clause_repository.dart';
+import 'package:tekmerion/src/features/export/application/export_share_adapter.dart';
+import 'package:tekmerion/src/features/export/application/record_package_export_service.dart';
+import 'package:tekmerion/src/features/export/domain/export_package_repository.dart';
 import 'package:tekmerion/src/features/obligation/domain/obligation_repository.dart';
 import 'package:tekmerion/src/features/record/application/complete_obligation_service.dart';
 import 'package:tekmerion/src/features/timeline/application/agreement_timeline_service.dart';
@@ -37,6 +40,21 @@ class FakeObligationRepository implements ObligationRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class FakeRecordPackageExportService implements RecordPackageExportService {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeExportPackageRepository implements ExportPackageRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeExportShareAdapter implements ExportShareAdapter {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   testWidgets('home screen presents the agreement-centered frozen loop',
       (WidgetTester tester) async {
@@ -46,6 +64,9 @@ void main() {
     final mockCompleteObligationService = FakeCompleteObligationService();
     final mockTimelineService = FakeAgreementTimelineService();
     final mockObligationRepo = FakeObligationRepository();
+    final mockExportService = FakeRecordPackageExportService();
+    final mockExportRepo = FakeExportPackageRepository();
+    final mockExportShareAdapter = FakeExportShareAdapter();
 
     await tester.pumpWidget(
       TekmerionApp(
@@ -55,6 +76,9 @@ void main() {
         evidenceStorage: mockStorage,
         completeObligationService: mockCompleteObligationService,
         timelineService: mockTimelineService,
+        exportService: mockExportService,
+        exportPackageRepository: mockExportRepo,
+        exportShareAdapter: mockExportShareAdapter,
       ),
     );
 

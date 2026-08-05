@@ -41,9 +41,9 @@ Tekmerion requires a way to export a self-contained, human-readable, hash-verifi
 **Implemented and Tested:**
 - ExportService and DTOs mapping exactly to the schema.
 - Strict file integrity and validation checks during staging.
+- UI integration, generating streams, and sharing functionality via `share_plus`.
 
 **Deferred:**
-- UI integration and sharing functionality.
 - Large-file benchmarking.
 - Full Draft 2020-12 validator support.
 

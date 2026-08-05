@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tekmerion/src/core/storage/evidence_storage.dart';
 import 'package:tekmerion/src/features/clause/domain/clause_repository.dart';
+import 'package:tekmerion/src/features/export/application/export_share_adapter.dart';
+import 'package:tekmerion/src/features/export/application/record_package_export_service.dart';
+import 'package:tekmerion/src/features/export/domain/export_package_repository.dart';
+import 'package:tekmerion/src/features/export/presentation/record_package_export_screen.dart';
 import 'package:tekmerion/src/features/obligation/domain/obligation_repository.dart';
 import 'package:tekmerion/src/features/obligation/presentation/obligations_list_screen.dart';
 import 'package:tekmerion/src/features/record/application/complete_obligation_service.dart';
@@ -28,6 +32,9 @@ class AgreementHomeScreen extends StatefulWidget {
     required this.evidenceStorage,
     required this.completeObligationService,
     required this.timelineService,
+    required this.exportService,
+    required this.exportPackageRepository,
+    required this.exportShareAdapter,
   });
 
   final AgreementImportService importService;
@@ -36,6 +43,9 @@ class AgreementHomeScreen extends StatefulWidget {
   final EvidenceStorage evidenceStorage;
   final CompleteObligationService completeObligationService;
   final AgreementTimelineService timelineService;
+  final RecordPackageExportService exportService;
+  final ExportPackageRepository exportPackageRepository;
+  final ExportShareAdapter exportShareAdapter;
 
   @override
   State<AgreementHomeScreen> createState() => _AgreementHomeScreenState();
@@ -279,12 +289,35 @@ class _AgreementHomeScreenState extends State<AgreementHomeScreen> {
                         builder: (_) => AgreementTimelineScreen(
                           agreement: _result!.agreement,
                           timelineService: widget.timelineService,
+                          exportService: widget.exportService,
+                          exportPackageRepository:
+                              widget.exportPackageRepository,
+                          exportShareAdapter: widget.exportShareAdapter,
                         ),
                       ),
                     );
                   },
                   icon: const Icon(Icons.history),
                   label: const Text('View Timeline'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => RecordPackageExportScreen(
+                          agreementId: _result!.agreement.id,
+                          agreementTitle: _result!.agreement.title,
+                          exportService: widget.exportService,
+                          exportPackageRepository:
+                              widget.exportPackageRepository,
+                          exportShareAdapter: widget.exportShareAdapter,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.archive),
+                  label: const Text('Export Record Package'),
                 ),
               ],
             ),

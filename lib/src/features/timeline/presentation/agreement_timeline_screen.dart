@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:tekmerion/src/features/export/application/export_share_adapter.dart';
+import 'package:tekmerion/src/features/export/application/record_package_export_service.dart';
+import 'package:tekmerion/src/features/export/domain/export_package_repository.dart';
+import 'package:tekmerion/src/features/export/presentation/record_package_export_screen.dart';
 import '../../agreement/domain/agreement.dart';
 import '../application/agreement_timeline_service.dart';
 import '../domain/timeline_event.dart';
@@ -18,10 +22,16 @@ class AgreementTimelineScreen extends StatefulWidget {
     super.key,
     required this.agreement,
     required this.timelineService,
+    required this.exportService,
+    required this.exportPackageRepository,
+    required this.exportShareAdapter,
   });
 
   final Agreement agreement;
   final AgreementTimelineService timelineService;
+  final RecordPackageExportService exportService;
+  final ExportPackageRepository exportPackageRepository;
+  final ExportShareAdapter exportShareAdapter;
 
   @override
   State<AgreementTimelineScreen> createState() =>
@@ -86,6 +96,23 @@ class _AgreementTimelineScreenState extends State<AgreementTimelineScreen> {
       appBar: AppBar(
         title: const Text('Agreement Timeline'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.archive),
+            tooltip: 'Export Record Package',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => RecordPackageExportScreen(
+                    agreementId: widget.agreement.id,
+                    agreementTitle: widget.agreement.title,
+                    exportService: widget.exportService,
+                    exportPackageRepository: widget.exportPackageRepository,
+                    exportShareAdapter: widget.exportShareAdapter,
+                  ),
+                ),
+              );
+            },
+          ),
           PopupMenuButton<TimelineFilter>(
             initialValue: _currentFilter,
             onSelected: (filter) {

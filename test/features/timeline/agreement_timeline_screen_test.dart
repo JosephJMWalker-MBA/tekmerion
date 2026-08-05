@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:tekmerion/src/features/agreement/domain/agreement.dart';
+import 'package:tekmerion/src/features/export/application/export_share_adapter.dart';
+import 'package:tekmerion/src/features/export/application/record_package_export_service.dart';
+import 'package:tekmerion/src/features/export/domain/export_package_repository.dart';
 import 'package:tekmerion/src/features/timeline/application/agreement_timeline_service.dart';
 import 'package:tekmerion/src/features/timeline/domain/timeline_event.dart';
 import 'package:tekmerion/src/features/timeline/domain/timeline_repository.dart';
@@ -17,6 +20,21 @@ class MockTimelineRepository implements TimelineRepository {
   ) async {
     return mockEvents;
   }
+}
+
+class FakeRecordPackageExportService implements RecordPackageExportService {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeExportPackageRepository implements ExportPackageRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeExportShareAdapter implements ExportShareAdapter {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
@@ -71,6 +89,9 @@ void main() {
         home: AgreementTimelineScreen(
           agreement: agreement,
           timelineService: timelineService,
+          exportService: FakeRecordPackageExportService(),
+          exportPackageRepository: FakeExportPackageRepository(),
+          exportShareAdapter: FakeExportShareAdapter(),
         ),
       ),
     );
@@ -107,6 +128,9 @@ void main() {
         home: AgreementTimelineScreen(
           agreement: agreement,
           timelineService: timelineService,
+          exportService: FakeRecordPackageExportService(),
+          exportPackageRepository: FakeExportPackageRepository(),
+          exportShareAdapter: FakeExportShareAdapter(),
         ),
       ),
     );
@@ -140,6 +164,9 @@ void main() {
         home: AgreementTimelineScreen(
           agreement: agreement,
           timelineService: timelineService,
+          exportService: FakeRecordPackageExportService(),
+          exportPackageRepository: FakeExportPackageRepository(),
+          exportShareAdapter: FakeExportShareAdapter(),
         ),
       ),
     );
