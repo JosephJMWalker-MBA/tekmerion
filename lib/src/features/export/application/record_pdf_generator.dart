@@ -68,7 +68,8 @@ class RecordPdfGenerator {
             pw.Text(
               'Complete Agreement Chain: ${manifest.scope.completeAgreementChain ? "Yes" : "No"}',
             ),
-            if (manifest.scope.completenessWarnings.isNotEmpty) ...[
+            if (manifest.scope.completenessWarnings != null &&
+                manifest.scope.completenessWarnings!.isNotEmpty) ...[
               pw.SizedBox(height: 10),
               pw.Text(
                 'Completeness Warnings:',
@@ -77,7 +78,7 @@ class RecordPdfGenerator {
                   color: PdfColors.red,
                 ),
               ),
-              ...manifest.scope.completenessWarnings
+              ...manifest.scope.completenessWarnings!
                   .map((w) => pw.Bullet(text: w)),
             ],
             pw.SizedBox(height: 24),
@@ -224,12 +225,24 @@ class RecordPdfGenerator {
                               fontSize: 14,
                             ),
                           ),
-                          pw.Text(
-                            r.occurredAt.toUtc().toIso8601String(),
-                            style: const pw.TextStyle(
-                              color: PdfColors.grey600,
-                              fontSize: 10,
-                            ),
+                          pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.end,
+                            children: [
+                              pw.Text(
+                                'Occurred at: ${r.occurredAt.toUtc().toIso8601String()}',
+                                style: const pw.TextStyle(
+                                  color: PdfColors.grey600,
+                                  fontSize: 10,
+                                ),
+                              ),
+                              pw.Text(
+                                'Recorded at: ${r.recordedAt.toUtc().toIso8601String()}',
+                                style: const pw.TextStyle(
+                                  color: PdfColors.grey600,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

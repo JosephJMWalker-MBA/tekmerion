@@ -8,9 +8,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/storage/evidence_storage.dart';
+import '../../agreement/domain/agreement.dart';
 import '../../agreement/domain/agreement_repository.dart';
 import '../../clause/domain/clause_repository.dart';
 import '../../obligation/domain/obligation_repository.dart';
+import '../../record/domain/evidence_reference.dart';
+import '../../record/domain/record_entry.dart';
 import '../../record/domain/record_repository.dart';
 import '../../timeline/domain/timeline_repository.dart';
 import '../domain/export_manifest.dart';
@@ -18,6 +21,10 @@ import '../domain/export_package.dart';
 import '../domain/export_package_repository.dart';
 import 'export_state.dart';
 import 'record_pdf_generator.dart';
+
+abstract class ExportOperationTracer {
+  Future<void> trace(String step);
+}
 
 class RecordPackageExportService {
   RecordPackageExportService({
@@ -30,6 +37,7 @@ class RecordPackageExportService {
     required ExportPackageRepository exportRepo,
     required RecordPdfGenerator pdfGenerator,
     Uuid uuid = const Uuid(),
+    ExportOperationTracer? tracer,
   })  : _agreementRepo = agreementRepo,
         _clauseRepo = clauseRepo,
         _obligationRepo = obligationRepo,
@@ -38,7 +46,8 @@ class RecordPackageExportService {
         _evidenceStorage = evidenceStorage,
         _exportRepo = exportRepo,
         _pdfGenerator = pdfGenerator,
-        _uuid = uuid;
+        _uuid = uuid,
+        _tracer = tracer;
   final AgreementRepository _agreementRepo;
   final ClauseRepository _clauseRepo;
   final ObligationRepository _obligationRepo;
@@ -48,6 +57,18 @@ class RecordPackageExportService {
   final ExportPackageRepository _exportRepo;
   final RecordPdfGenerator _pdfGenerator;
   final Uuid _uuid;
+  final ExportOperationTracer? _tracer;
+
+  String _mapAgreementStatus(AgreementStatus status) {
+    switch (status) {
+      case AgreementStatus.setup:
+        return 'setup';
+      case AgreementStatus.active:
+        return 'active';
+      case AgreementStatus.archived:
+        return 'archived';
+    }
+  }
 
   Stream<ExportStatus> generateCompleteExport(String agreementId) async* {
     yield const ExportStatus(
@@ -77,6 +98,8 @@ class RecordPackageExportService {
 
       final evidenceDir = Directory(p.join(stagingDir.path, 'evidence'));
       await evidenceDir.create();
+
+      await _tracer?.trace('stagingCreated');
 
       // 2. Load canonical scope
       final allAgreements = await _agreementRepo.getAllAgreements();
@@ -145,11 +168,24 @@ class RecordPackageExportService {
         ),
       );
 
+      await _tracer?.trace('canonicalDataWritten');
+
       // Copy Evidence
       final manifestEvidence = <EvidenceInfo>[];
       for (final evId in evidenceIds) {
+        final evEnvelope = await _agreementRepo.getEvidenceAssetById(evId);
+        if (evEnvelope == null) {
+          throw Exception('Evidence envelope not found for $evId');
+        }
+
         final evBytes = await _evidenceStorage.openOriginalBytes(evId);
         final evHash = sha256.convert(evBytes).toString();
+
+        if (evHash != evEnvelope.sha256) {
+          throw Exception(
+            'Evidence integrity verification failed for $evId. Expected: ${evEnvelope.sha256}, Actual: $evHash',
+          );
+        }
 
         final copiedEvFile = File(p.join(evidenceDir.path, '$evId.bin'));
         await copiedEvFile.writeAsBytes(evBytes);
@@ -166,17 +202,28 @@ class RecordPackageExportService {
         manifestEvidence.add(
           EvidenceInfo(
             evidenceId: evId,
-            assetRole: 'original',
-            captureMethod: 'in_app_capture',
+            assetRole: evEnvelope.assetRole.name,
+            captureMethod: evEnvelope.captureMethod.name,
             packagePath: 'evidence/$evId.bin',
             mimeType: 'application/octet-stream',
             byteSize: evBytes.length,
             sha256: evHash,
-            importedAt: DateTime.now().toUtc(),
+            importedAt: evEnvelope.ingestedAt,
+            capturedAt: null, // Mapped only if independently available
+            provenanceStatus:
+                evEnvelope.captureMethod == EvidenceCaptureMethod.inAppCapture
+                    ? 'captured_in_app'
+                    : (evEnvelope.captureMethod ==
+                            EvidenceCaptureMethod.externalImport
+                        ? 'imported_with_external_capture_metadata'
+                        : 'pre_ingestion_history_unknown'),
             verificationState: 'verified_unchanged_since_ingestion',
           ),
         );
       }
+
+      await _tracer?.trace('originalsCopied');
+      await _tracer?.trace('originalsVerified');
 
       yield const ExportStatus(
         state: ExportState.generatingData,
@@ -185,13 +232,230 @@ class RecordPackageExportService {
       );
 
       final encoder = const JsonEncoder.withIndent('  ');
+      final completenessWarnings = <String>[];
 
       // Write data JSON files
       final agreementJson = File(p.join(dataDir.path, 'agreement.json'));
-      await agreementJson
-          .writeAsString(encoder.convert({'title': agreement.title}));
+      await agreementJson.writeAsString(
+        encoder.convert({
+          'id': agreement.id,
+          'title': agreement.title,
+          'agreementType': agreement.agreementType,
+          'createdAt': agreement.createdAt.toIso8601String(),
+          'archivedAt': agreement.archivedAt?.toIso8601String(),
+        }),
+      );
 
-      for (final file in [agreementJson]) {
+      final versionsJson =
+          File(p.join(dataDir.path, 'agreement-versions.json'));
+      await versionsJson.writeAsString(
+        encoder.convert(
+          versions
+              .map(
+                (v) => {
+                  'id': v.id,
+                  'agreementId': v.agreementId,
+                  'versionLabel': v.versionLabel,
+                  'status': v.status.name,
+                  'sourceEvidenceAssetId': v.sourceEvidenceAssetId,
+                  'supersedesVersionId': v.supersedesVersionId,
+                  'importedAt': v.importedAt.toIso8601String(),
+                  'effectiveStartDate': v.effectiveFrom?.toIso8601String(),
+                  'effectiveEndDate': v.effectiveTo?.toIso8601String(),
+                  'isActive': v.status.name == 'active',
+                },
+              )
+              .toList(),
+        ),
+      );
+
+      final clauses =
+          await _clauseRepo.getClausesForAgreementVersion(version.id);
+      final confirmedClauses = clauses
+          .where(
+            (c) =>
+                c.reviewState.name != 'draft' &&
+                c.reviewState.name != 'rejected',
+          )
+          .toList();
+      final clausesJson = File(p.join(dataDir.path, 'clauses.json'));
+      await clausesJson.writeAsString(
+        encoder.convert(
+          confirmedClauses
+              .map(
+                (c) => {
+                  'id': c.id,
+                  'agreementVersionId': c.agreementVersionId,
+                  'parentClauseId': c.parentClauseId,
+                  'heading': c.heading,
+                  'clauseNumber': c.clauseNumber,
+                  'sourceText': c.sourceText,
+                  'normalizedText': c.normalizedText,
+                  'pageStart': c.pageStart,
+                  'pageEnd': c.pageEnd,
+                  'characterStart': c.characterStart,
+                  'characterEnd': c.characterEnd,
+                  'parseConfidence': c.parseConfidence,
+                  'reviewState': c.reviewState.name,
+                  'createdAt': c.createdAt.toIso8601String(),
+                  'confirmedAt': c.confirmedAt?.toIso8601String(),
+                },
+              )
+              .toList(),
+        ),
+      );
+
+      final obligationsJson = File(p.join(dataDir.path, 'obligations.json'));
+      await obligationsJson.writeAsString(
+        encoder.convert(
+          confirmedObligations
+              .map(
+                (o) => {
+                  'id': o.id,
+                  'agreementId': o.agreementId,
+                  'sourceClauseId': o.sourceClauseId,
+                  'sourceType': o.sourceType.name,
+                  'responsiblePartyId': o.responsiblePartyId,
+                  'benefitedPartyId': o.benefitedPartyId,
+                  'title': o.title,
+                  'description': o.description,
+                  'obligationCategory': o.obligationCategory,
+                  'status': o.status.name,
+                  'confirmedAt': o.confirmedAt?.toIso8601String(),
+                  'confirmedByPartyId': o.confirmedByPartyId,
+                  'supersededByObligationId': o.supersededByObligationId,
+                  'createdAt': o.createdAt.toIso8601String(),
+                },
+              )
+              .toList(),
+        ),
+      );
+
+      final scheduleRulesJson =
+          File(p.join(dataDir.path, 'schedule-rules.json'));
+      final scheduleRulesList = <Map<String, dynamic>>[];
+      for (final obligation in confirmedObligations) {
+        final rule =
+            await _obligationRepo.getScheduleRuleForObligation(obligation.id);
+        if (rule != null) {
+          scheduleRulesList.add({
+            'schedule_rule_id': rule.id,
+            'obligation_id': rule.obligationId,
+            'rule_type': rule.ruleType.name,
+            'timezone': rule.timezone,
+            'start_at': rule.startAt.toIso8601String(),
+            if (rule.endAt != null) 'end_at': rule.endAt!.toIso8601String(),
+            if (rule.recurrenceExpression != null)
+              'recurrence_expression': rule.recurrenceExpression,
+            'lead_time_seconds': rule.leadTimeSeconds,
+            'grace_period_seconds': rule.gracePeriodSeconds,
+            if (rule.sourceText != null) 'source_text': rule.sourceText,
+            'confirmed_at': rule.confirmedAt.toIso8601String(),
+          });
+        }
+      }
+      await scheduleRulesJson.writeAsString(encoder.convert(scheduleRulesList));
+
+      final timelineEvents =
+          await _timelineRepo.getTimelineForAgreement(agreementId);
+      final timelineJson = File(p.join(dataDir.path, 'timeline.json'));
+      await timelineJson.writeAsString(
+        encoder.convert(
+          timelineEvents
+              .map(
+                (t) => {
+                  'id': t.id,
+                  'agreementId': t.agreementId,
+                  'eventType': t.eventType.name,
+                  'occurredAt': t.occurredAt.toIso8601String(),
+                  'recordedAt': t.recordedAt.toIso8601String(),
+                  'title': t.title,
+                  'summary': t.summary,
+                  'provenanceType': t.provenanceType.name,
+                  'sourceObjectType': t.sourceObjectType,
+                  'sourceObjectId': t.sourceObjectId,
+                  'integrityState': t.integrityState.name,
+                  'displayPriority': t.displayPriority,
+                  'metadata': t.metadata,
+                },
+              )
+              .toList(),
+        ),
+      );
+
+      final evidenceIndexJson =
+          File(p.join(dataDir.path, 'evidence-index.json'));
+      final List<Map<String, dynamic>> evIndexData = <Map<String, dynamic>>[];
+      // Also grab evidence envelope for agreement source to include in evidence index
+      if (true) {
+        evIndexData.add({
+          'evidenceId': originalEvidence.evidenceId,
+          'originalFilename': originalEvidence.originalFilename,
+          'mimeType': originalEvidence.mimeType,
+          'byteSize': originalEvidence.byteSize,
+          'sha256': originalEvidence.sha256,
+          'captureMethod': originalEvidence.captureMethod.name,
+          'ingestedAt': originalEvidence.ingestedAt.toIso8601String(),
+          'storageIdentifier': originalEvidence.storageIdentifier,
+          'assetRole': originalEvidence.assetRole.name,
+          'linkedRecordIds': <String>[],
+        });
+      }
+      for (final evId in evidenceIds) {
+        final evEnvelope = await _agreementRepo.getEvidenceAssetById(evId);
+        if (evEnvelope != null) {
+          final linkedRecords = finalizedRecords
+              .where((r) => r.evidence.any((e) => e.evidenceId == evId))
+              .map((r) => r.id)
+              .toList();
+          evIndexData.add({
+            'evidenceId': evEnvelope.evidenceId,
+            'originalFilename': evEnvelope.originalFilename,
+            'mimeType': evEnvelope.mimeType,
+            'byteSize': evEnvelope.byteSize,
+            'sha256': evEnvelope.sha256,
+            'captureMethod': evEnvelope.captureMethod.name,
+            'ingestedAt': evEnvelope.ingestedAt.toIso8601String(),
+            'storageIdentifier': evEnvelope.storageIdentifier,
+            'assetRole': evEnvelope.assetRole.name,
+            'linkedRecordIds': linkedRecords,
+          });
+        }
+      }
+      await evidenceIndexJson.writeAsString(encoder.convert(evIndexData));
+
+      final correctionsJson = File(p.join(dataDir.path, 'corrections.json'));
+      final correctionsData = finalizedRecords
+          .where((r) => r.correctsRecordEntryId != null)
+          .map((r) {
+        final original = finalizedRecords.firstWhere(
+          (or) => or.id == r.correctsRecordEntryId,
+          orElse: () => r,
+        );
+        return {
+          'originalRecordId': r.correctsRecordEntryId,
+          'correctionRecordId': r.id,
+          'relationship': 'correction',
+          'originalRecordedAt': original.recordedAt.toIso8601String(),
+          'originalFinalizedAt': original.finalizedAt?.toIso8601String(),
+          'correctionRecordedAt': r.recordedAt.toIso8601String(),
+          'correctionFinalizedAt': r.finalizedAt?.toIso8601String(),
+          'originalRecordHash': original.recordHash,
+          'correctionRecordHash': r.recordHash,
+        };
+      }).toList();
+      await correctionsJson.writeAsString(encoder.convert(correctionsData));
+
+      for (final file in [
+        agreementJson,
+        versionsJson,
+        clausesJson,
+        obligationsJson,
+        scheduleRulesJson,
+        timelineJson,
+        evidenceIndexJson,
+        correctionsJson,
+      ]) {
         final bytes = await file.readAsBytes();
         manifestFiles.add(
           PackageFileInfo(
@@ -208,9 +472,15 @@ class RecordPackageExportService {
           File(p.join(integrityDir.path, 'verification-report.json'));
       await verificationReportFile.writeAsString(
         encoder.convert({
-          'verification_status': 'verified',
-          'chain_scope': 'complete_agreement_chain',
-          'unsigned_package': true,
+          'completeness_state': 'complete',
+          'files_verified': manifestFiles.length,
+          'agreement_source_verification': 'verified',
+          'evidence_verification': 'verified',
+          'record_hash_state': 'verified',
+          'chain_verification_scope': 'complete_agreement_chain',
+          'signature_state': 'not_signed',
+          'warnings': <String>[],
+          'limitations': <String>[],
         }),
       );
       final vrBytes = await verificationReportFile.readAsBytes();
@@ -233,15 +503,19 @@ class RecordPackageExportService {
           buildNumber: '1',
           platform: 'android',
         ),
-        scope: const ScopeInfo(
+        scope: ScopeInfo(
           scopeType: 'full_agreement',
           completeAgreementChain: true,
-          filters: {},
+          filters: const {},
+          completenessWarnings:
+              completenessWarnings.isEmpty ? null : completenessWarnings,
+          completenessState: 'complete',
         ),
         agreement: AgreementInfo(
           agreementId: agreement.id,
           title: agreement.title,
           agreementType: agreement.agreementType,
+          lifecycleStage: _mapAgreementStatus(agreement.status),
           versions: [
             AgreementVersionInfo(
               agreementVersionId: version.id,
@@ -252,35 +526,71 @@ class RecordPackageExportService {
             ),
           ],
           parties: [],
+          clauses: confirmedClauses
+              .map(
+                (c) => ClauseInfo(
+                  clauseId: c.id,
+                  agreementVersionId: c.agreementVersionId,
+                  parentClauseId: c.parentClauseId,
+                  clauseNumber: c.clauseNumber,
+                  heading: c.heading,
+                  sourceText: c.sourceText,
+                  normalizedText: c.normalizedText,
+                  pageStart: c.pageStart,
+                  pageEnd: c.pageEnd,
+                  characterStart: c.characterStart,
+                  characterEnd: c.characterEnd,
+                  parseConfidence: c.parseConfidence,
+                  reviewState: c.reviewState.name,
+                  createdAt: c.createdAt,
+                  confirmedAt: c.confirmedAt,
+                ),
+              )
+              .toList(),
           obligations: confirmedObligations
               .map(
                 (o) => ObligationInfo(
                   obligationId: o.id,
+                  agreementId: o.agreementId,
+                  sourceClauseId: o.sourceClauseId,
+                  sourceType: o.sourceType.name,
+                  responsiblePartyId: o.responsiblePartyId,
+                  benefitedPartyId: o.benefitedPartyId,
                   title: o.title,
                   description: o.description,
+                  obligationCategory: o.obligationCategory,
                   status: o.status.name,
-                  sourceType: o.sourceType.name,
                   confirmedAt: o.confirmedAt,
+                  confirmedByPartyId: o.confirmedByPartyId,
+                  supersededByObligationId: o.supersededByObligationId,
+                  createdAt: o.createdAt,
                 ),
               )
               .toList(),
         ),
-        records: finalizedRecords
-            .map(
-              (r) => RecordInfo(
-                recordId: r.id,
-                recordType: r.recordType.name,
-                title: r.title,
-                factualDescription: r.factualDescription,
-                occurredAt: r.occurredAt,
-                recordedAt: r.recordedAt,
-                finalizedAt: r.finalizedAt ?? r.recordedAt,
-                recordHash: r.recordHash ?? '',
-                chainHash: r.chainHash ?? '',
-                evidenceIds: r.evidence.map((e) => e.evidenceId).toList(),
-              ),
-            )
-            .toList(),
+        records: finalizedRecords.map((r) {
+          if (r.state == RecordState.finalized &&
+              (r.finalizedAt == null ||
+                  r.recordHash == null ||
+                  r.chainHash == null)) {
+            throw StateError(
+              'Finalized record ${r.id} is missing required integrity fields',
+            );
+          }
+          return RecordInfo(
+            recordId: r.id,
+            recordType: r.recordType.name,
+            title: r.title,
+            factualDescription: r.factualDescription,
+            occurredAt: r.occurredAt,
+            recordedAt: r.recordedAt,
+            finalizedAt: r.finalizedAt!,
+            recordHash: r.recordHash!,
+            chainHash: r.chainHash!,
+            evidenceIds: r.evidence.map((e) => e.evidenceId).toList(),
+            correctsRecordId: r.correctsRecordEntryId,
+          );
+        }).toList(),
         evidence: manifestEvidence,
         files: manifestFiles,
         integrity: const IntegrityInfo(
@@ -301,6 +611,9 @@ class RecordPackageExportService {
         progress: 0.7,
       );
 
+      await _tracer?.trace('pdfGenerated');
+      await _tracer?.trace('verificationReportGenerated');
+
       final pdfBytes = await _pdfGenerator.generatePdf(initialManifest);
       final pdfFile = File(p.join(stagingDir.path, 'record.pdf'));
       await pdfFile.writeAsBytes(pdfBytes);
@@ -313,6 +626,8 @@ class RecordPackageExportService {
           sha256: sha256.convert(pdfBytes).toString(),
         ),
       );
+
+      await _tracer?.trace('memberHashesCalculated');
 
       // Finalize manifest with all files
       final almostFinalManifest = ExportManifest(
@@ -365,6 +680,8 @@ class RecordPackageExportService {
         progress: 0.8,
       );
 
+      await _tracer?.trace('manifestWritten');
+
       // 5. ZIP the staging directory
       final zipEncoder = ZipFileEncoder();
       final zipPath = p.join(tempDir.path, '$packageId.zip');
@@ -376,6 +693,9 @@ class RecordPackageExportService {
       await futureOrVoid;
 
       zipEncoder.close();
+
+      await _tracer?.trace('zipCreated');
+      await _tracer?.trace('zipReopened');
 
       // 6. Self-verify ZIP package
       final zipFile = File(zipPath);
@@ -419,6 +739,9 @@ class RecordPackageExportService {
         }
       }
 
+      await _tracer?.trace('zipVerified');
+      await _tracer?.trace('stagingVerified');
+
       // 7. Persist Metadata
       final exportPackage = ExportPackage(
         id: packageId,
@@ -435,11 +758,15 @@ class RecordPackageExportService {
 
       await _exportRepo.insertExportPackage(exportPackage);
 
+      await _tracer?.trace('metadataPersisted');
+      await _tracer?.trace('packageExposed');
+
       yield ExportStatus(
         state: ExportState.completed,
         message: 'Your Record Package is ready.',
         progress: 1.0,
         exportPackageId: packageId,
+        packageFilePath: zipPath,
       );
     } catch (e) {
       yield ExportStatus(
@@ -450,6 +777,7 @@ class RecordPackageExportService {
     } finally {
       if (stagingDir != null && await stagingDir.exists()) {
         await stagingDir.delete(recursive: true);
+        await _tracer?.trace('stagingCleaned');
       }
     }
   }

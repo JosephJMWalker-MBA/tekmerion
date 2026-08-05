@@ -74,13 +74,15 @@ class ScopeInfo {
     required this.completeAgreementChain,
     required this.filters,
     this.excludedItemCount,
-    this.completenessWarnings = const [],
+    this.completenessWarnings,
+    required this.completenessState,
   });
   final String scopeType;
   final bool completeAgreementChain;
   final Map<String, dynamic> filters;
   final int? excludedItemCount;
-  final List<String> completenessWarnings;
+  final List<String>? completenessWarnings;
+  final String completenessState;
 
   Map<String, dynamic> toJson() {
     return {
@@ -88,8 +90,9 @@ class ScopeInfo {
       'complete_agreement_chain': completeAgreementChain,
       'filters': filters,
       if (excludedItemCount != null) 'excluded_item_count': excludedItemCount,
-      if (completenessWarnings.isNotEmpty)
+      if (completenessWarnings != null && completenessWarnings!.isNotEmpty)
         'completeness_warnings': completenessWarnings,
+      'completeness_state': completenessState,
     };
   }
 }
@@ -105,6 +108,7 @@ class AgreementInfo {
     required this.versions,
     required this.parties,
     required this.obligations,
+    required this.clauses,
   });
   final String agreementId;
   final String title;
@@ -114,6 +118,7 @@ class AgreementInfo {
   final List<AgreementVersionInfo> versions;
   final List<PartyInfo> parties;
   final List<ObligationInfo> obligations;
+  final List<ClauseInfo> clauses;
 
   Map<String, dynamic> toJson() {
     return {
@@ -124,6 +129,7 @@ class AgreementInfo {
       if (lifecycleStage != null) 'lifecycle_stage': lifecycleStage,
       'versions': versions.map((e) => e.toJson()).toList(),
       'parties': parties.map((e) => e.toJson()).toList(),
+      'clauses': clauses.map((e) => e.toJson()).toList(),
       'obligations': obligations.map((e) => e.toJson()).toList(),
     };
   }
@@ -148,6 +154,65 @@ class PartyInfo {
       'display_name': displayName,
       if (partyType != null) 'party_type': partyType,
       'roles': roles,
+    };
+  }
+}
+
+@immutable
+@immutable
+class ClauseInfo {
+  const ClauseInfo({
+    required this.clauseId,
+    required this.agreementVersionId,
+    this.parentClauseId,
+    this.clauseNumber,
+    this.heading,
+    required this.sourceText,
+    this.normalizedText,
+    this.pageStart,
+    this.pageEnd,
+    this.characterStart,
+    this.characterEnd,
+    this.parseConfidence,
+    required this.reviewState,
+    required this.createdAt,
+    this.confirmedAt,
+  });
+
+  final String clauseId;
+  final String agreementVersionId;
+  final String? parentClauseId;
+  final String? clauseNumber;
+  final String? heading;
+  final String sourceText;
+  final String? normalizedText;
+  final int? pageStart;
+  final int? pageEnd;
+  final int? characterStart;
+  final int? characterEnd;
+  final double? parseConfidence;
+  final String reviewState;
+  final DateTime createdAt;
+  final DateTime? confirmedAt;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'clause_id': clauseId,
+      'agreement_version_id': agreementVersionId,
+      if (parentClauseId != null) 'parent_clause_id': parentClauseId,
+      if (clauseNumber != null) 'clause_number': clauseNumber,
+      if (heading != null) 'heading': heading,
+      'source_text': sourceText,
+      if (normalizedText != null) 'normalized_text': normalizedText,
+      if (pageStart != null) 'page_start': pageStart,
+      if (pageEnd != null) 'page_end': pageEnd,
+      if (characterStart != null) 'character_start': characterStart,
+      if (characterEnd != null) 'character_end': characterEnd,
+      if (parseConfidence != null) 'parse_confidence': parseConfidence,
+      'review_state': reviewState,
+      'created_at': createdAt.toUtc().toIso8601String(),
+      if (confirmedAt != null)
+        'confirmed_at': confirmedAt!.toUtc().toIso8601String(),
     };
   }
 }
@@ -190,70 +255,56 @@ class AgreementVersionInfo {
 class ObligationInfo {
   const ObligationInfo({
     required this.obligationId,
-    required this.title,
-    required this.description,
-    required this.status,
+    required this.agreementId,
+    this.sourceClauseId,
     required this.sourceType,
     this.responsiblePartyId,
     this.benefitedPartyId,
+    required this.title,
+    required this.description,
+    required this.obligationCategory,
+    required this.status,
     this.confirmedAt,
-    this.sourceClause,
+    this.confirmedByPartyId,
+    this.supersededByObligationId,
+    required this.createdAt,
   });
+
   final String obligationId;
-  final String title;
-  final String description;
-  final String status;
+  final String agreementId;
+  final String? sourceClauseId;
   final String sourceType;
   final String? responsiblePartyId;
   final String? benefitedPartyId;
+  final String title;
+  final String description;
+  final String obligationCategory;
+  final String status;
   final DateTime? confirmedAt;
-  final ClauseReferenceInfo? sourceClause;
+  final String? confirmedByPartyId;
+  final String? supersededByObligationId;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() {
     return {
       'obligation_id': obligationId,
-      'title': title,
-      'description': description,
-      'status': status,
+      'agreement_id': agreementId,
+      if (sourceClauseId != null) 'source_clause_id': sourceClauseId,
       'source_type': sourceType,
       if (responsiblePartyId != null)
         'responsible_party_id': responsiblePartyId,
       if (benefitedPartyId != null) 'benefited_party_id': benefitedPartyId,
+      'title': title,
+      'description': description,
+      'obligation_category': obligationCategory,
+      'status': status,
       if (confirmedAt != null)
         'confirmed_at': confirmedAt!.toUtc().toIso8601String(),
-      'source_clause': sourceClause?.toJson(),
-    };
-  }
-}
-
-@immutable
-class ClauseReferenceInfo {
-  const ClauseReferenceInfo({
-    required this.agreementVersionId,
-    required this.clauseId,
-    this.clauseNumber,
-    this.heading,
-    this.pageStart,
-    this.pageEnd,
-    required this.sourceText,
-  });
-  final String agreementVersionId;
-  final String clauseId;
-  final String? clauseNumber;
-  final String? heading;
-  final int? pageStart;
-  final int? pageEnd;
-  final String sourceText;
-
-  Map<String, dynamic> toJson() {
-    return {
-      'agreement_version_id': agreementVersionId,
-      'clause_id': clauseId,
-      if (clauseNumber != null) 'clause_number': clauseNumber,
-      if (heading != null) 'heading': heading,
-      if (pageStart != null) 'page_start': pageStart,
-      if (pageEnd != null) 'page_end': pageEnd,
-      'source_text': sourceText,
+      if (confirmedByPartyId != null)
+        'confirmed_by_party_id': confirmedByPartyId,
+      if (supersededByObligationId != null)
+        'superseded_by_obligation_id': supersededByObligationId,
+      'created_at': createdAt.toUtc().toIso8601String(),
     };
   }
 }
@@ -271,7 +322,7 @@ class RecordInfo {
     required this.finalizedAt,
     this.timezone,
     this.obligationId,
-    this.sourceClause,
+    this.sourceClauseId,
     this.correctsRecordId,
     required this.recordHash,
     this.previousChainHash,
@@ -288,7 +339,7 @@ class RecordInfo {
   final DateTime finalizedAt;
   final String? timezone;
   final String? obligationId;
-  final ClauseReferenceInfo? sourceClause;
+  final String? sourceClauseId;
   final String? correctsRecordId;
   final String recordHash;
   final String? previousChainHash;
@@ -307,7 +358,7 @@ class RecordInfo {
       'finalized_at': finalizedAt.toUtc().toIso8601String(),
       if (timezone != null) 'timezone': timezone,
       if (obligationId != null) 'obligation_id': obligationId,
-      if (sourceClause != null) 'source_clause': sourceClause!.toJson(),
+      if (sourceClauseId != null) 'source_clause_id': sourceClauseId,
       if (correctsRecordId != null) 'corrects_record_id': correctsRecordId,
       'record_hash': recordHash,
       if (previousChainHash != null) 'previous_chain_hash': previousChainHash,
@@ -332,7 +383,7 @@ class EvidenceInfo {
     this.capturedAt,
     required this.importedAt,
     required this.verificationState,
-    this.preIngestionHistoryKnown,
+    required this.provenanceStatus,
     this.sourceMetadata,
   });
   final String evidenceId;
@@ -347,7 +398,7 @@ class EvidenceInfo {
   final DateTime? capturedAt;
   final DateTime importedAt;
   final String verificationState;
-  final bool? preIngestionHistoryKnown;
+  final String provenanceStatus;
   final Map<String, dynamic>? sourceMetadata;
 
   Map<String, dynamic> toJson() {
@@ -366,8 +417,7 @@ class EvidenceInfo {
         'captured_at': capturedAt!.toUtc().toIso8601String(),
       'imported_at': importedAt.toUtc().toIso8601String(),
       'verification_state': verificationState,
-      if (preIngestionHistoryKnown != null)
-        'pre_ingestion_history_known': preIngestionHistoryKnown,
+      'provenance_status': provenanceStatus,
       if (sourceMetadata != null) 'source_metadata': sourceMetadata,
     };
   }

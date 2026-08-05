@@ -37,96 +37,216 @@
     "generator": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["application", "application_version", "platform"],
+      "required": [
+        "application",
+        "application_version",
+        "platform"
+      ],
       "properties": {
-        "application": {"type": "string", "const": "Tekmerion"},
-        "application_version": {"type": "string"},
-        "build_number": {"type": "string"},
-        "platform": {"type": "string", "enum": ["android", "ios", "other"]},
-        "package_identifier": {"type": "string", "const": "com.aerialsoft.tekmerion"}
+        "application": {
+          "type": "string",
+          "const": "Tekmerion"
+        },
+        "application_version": {
+          "type": "string"
+        },
+        "build_number": {
+          "type": "string"
+        },
+        "platform": {
+          "type": "string",
+          "enum": [
+            "android",
+            "ios",
+            "other"
+          ]
+        },
+        "package_identifier": {
+          "type": "string",
+          "const": "com.aerialsoft.tekmerion"
+        }
       }
     },
     "scope": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["scope_type", "complete_agreement_chain", "filters"],
+      "required": [
+        "scope_type",
+        "complete_agreement_chain",
+        "filters",
+        "completeness_state"
+      ],
       "properties": {
         "scope_type": {
           "type": "string",
-          "enum": ["full_agreement", "selected_records", "date_range", "selected_obligations"]
+          "enum": [
+            "full_agreement",
+            "selected_records",
+            "date_range",
+            "selected_obligations"
+          ]
         },
-        "complete_agreement_chain": {"type": "boolean"},
+        "complete_agreement_chain": {
+          "type": "boolean"
+        },
         "filters": {
           "type": "object",
           "additionalProperties": true
         },
-        "excluded_item_count": {"type": "integer", "minimum": 0},
+        "excluded_item_count": {
+          "type": "integer",
+          "minimum": 0
+        },
         "completeness_warnings": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": {
+            "type": "string"
+          },
           "uniqueItems": true
+        },
+        "completeness_state": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "partial",
+            "incomplete_due_to_missing_structured_data",
+            "verification_failed"
+          ]
         }
       }
     },
     "agreement": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["agreement_id", "title", "agreement_type", "versions", "parties", "obligations"],
+      "required": [
+        "agreement_id",
+        "title",
+        "agreement_type",
+        "versions",
+        "parties",
+        "obligations",
+        "clauses"
+      ],
       "properties": {
-        "agreement_id": {"type": "string", "format": "uuid"},
-        "title": {"type": "string"},
-        "agreement_type": {"type": "string"},
-        "subject_id": {"type": ["string", "null"], "format": "uuid"},
-        "lifecycle_stage": {"type": ["string", "null"]},
+        "agreement_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "agreement_type": {
+          "type": "string"
+        },
+        "subject_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "lifecycle_stage": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "versions": {
           "type": "array",
-          "items": {"$ref": "#/$defs/agreementVersion"}
+          "items": {
+            "$ref": "#/$defs/agreementVersion"
+          }
         },
         "parties": {
           "type": "array",
-          "items": {"$ref": "#/$defs/party"}
+          "items": {
+            "$ref": "#/$defs/party"
+          }
         },
         "obligations": {
           "type": "array",
-          "items": {"$ref": "#/$defs/obligation"}
+          "items": {
+            "$ref": "#/$defs/obligation"
+          }
+        },
+        "clauses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/clause"
+          }
         }
       }
     },
     "records": {
       "type": "array",
-      "items": {"$ref": "#/$defs/record"}
+      "items": {
+        "$ref": "#/$defs/record"
+      }
     },
     "evidence": {
       "type": "array",
-      "items": {"$ref": "#/$defs/evidence"}
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
     },
     "files": {
       "type": "array",
-      "items": {"$ref": "#/$defs/packageFile"}
+      "items": {
+        "$ref": "#/$defs/packageFile"
+      }
     },
     "integrity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["manifest_sha256", "verification_status", "chain_scope"],
+      "required": [
+        "manifest_sha256",
+        "verification_status",
+        "chain_scope"
+      ],
       "properties": {
-        "manifest_sha256": {"$ref": "#/$defs/sha256"},
-        "manifest_signature_path": {"type": ["string", "null"]},
+        "manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "manifest_signature_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "verification_status": {
           "type": "string",
-          "enum": ["not_run", "verified", "verified_with_warnings", "failed"]
+          "enum": [
+            "not_run",
+            "verified",
+            "verified_with_warnings",
+            "failed"
+          ]
         },
         "chain_scope": {
           "type": "string",
-          "enum": ["complete_agreement_chain", "included_scope_only", "not_available"]
+          "enum": [
+            "complete_agreement_chain",
+            "included_scope_only",
+            "not_available"
+          ]
         },
-        "verification_report_path": {"type": ["string", "null"]},
-        "trusted_timestamp": {"$ref": "#/$defs/trustedTimestamp"}
+        "verification_report_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "trusted_timestamp": {
+          "$ref": "#/$defs/trustedTimestamp"
+        }
       }
     },
     "disclaimers": {
       "type": "array",
       "minItems": 1,
-      "items": {"type": "string"}
+      "items": {
+        "type": "string"
+      }
     }
   },
   "$defs": {
@@ -137,14 +257,30 @@
     "party": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["party_id", "display_name", "roles"],
+      "required": [
+        "party_id",
+        "display_name",
+        "roles"
+      ],
       "properties": {
-        "party_id": {"type": "string", "format": "uuid"},
-        "display_name": {"type": "string"},
-        "party_type": {"type": ["string", "null"]},
+        "party_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "party_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "roles": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": {
+            "type": "string"
+          },
           "uniqueItems": true
         }
       }
@@ -152,49 +288,127 @@
     "agreementVersion": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["agreement_version_id", "version_label", "status", "source_file_path", "source_file_sha256"],
+      "required": [
+        "agreement_version_id",
+        "version_label",
+        "status",
+        "source_file_path",
+        "source_file_sha256"
+      ],
       "properties": {
-        "agreement_version_id": {"type": "string", "format": "uuid"},
-        "version_label": {"type": "string"},
-        "status": {"type": "string"},
-        "effective_from": {"type": ["string", "null"], "format": "date-time"},
-        "effective_to": {"type": ["string", "null"], "format": "date-time"},
-        "source_file_path": {"type": "string"},
-        "source_file_sha256": {"$ref": "#/$defs/sha256"}
-      }
-    },
-    "clauseReference": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["agreement_version_id", "clause_id", "source_text"],
-      "properties": {
-        "agreement_version_id": {"type": "string", "format": "uuid"},
-        "clause_id": {"type": "string", "format": "uuid"},
-        "clause_number": {"type": ["string", "null"]},
-        "heading": {"type": ["string", "null"]},
-        "page_start": {"type": ["integer", "null"], "minimum": 1},
-        "page_end": {"type": ["integer", "null"], "minimum": 1},
-        "source_text": {"type": "string"}
+        "agreement_version_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "version_label": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "effective_from": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "effective_to": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "source_file_path": {
+          "type": "string"
+        },
+        "source_file_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     },
     "obligation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["obligation_id", "title", "description", "status", "source_type"],
+      "required": [
+        "obligation_id",
+        "agreement_id",
+        "source_type",
+        "title",
+        "description",
+        "obligation_category",
+        "status",
+        "created_at"
+      ],
       "properties": {
-        "obligation_id": {"type": "string", "format": "uuid"},
-        "title": {"type": "string"},
-        "description": {"type": "string"},
-        "status": {"type": "string"},
-        "source_type": {"type": "string"},
-        "responsible_party_id": {"type": ["string", "null"], "format": "uuid"},
-        "benefited_party_id": {"type": ["string", "null"], "format": "uuid"},
-        "confirmed_at": {"type": ["string", "null"], "format": "date-time"},
-        "source_clause": {
-          "oneOf": [
-            {"$ref": "#/$defs/clauseReference"},
-            {"type": "null"}
+        "obligation_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "agreement_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "source_clause_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "source_type": {
+          "type": "string"
+        },
+        "responsible_party_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "benefited_party_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "obligation_category": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "confirmed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "confirmed_by_party_id": {
+          "type": [
+            "string",
+            "null"
           ]
+        },
+        "superseded_by_obligation_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -214,41 +428,97 @@
         "evidence_ids"
       ],
       "properties": {
-        "record_id": {"type": "string", "format": "uuid"},
-        "record_type": {"type": "string"},
-        "title": {"type": "string"},
-        "factual_description": {"type": "string"},
-        "interpretation_text": {"type": ["string", "null"]},
-        "occurred_at": {"type": "string", "format": "date-time"},
-        "recorded_at": {"type": "string", "format": "date-time"},
-        "finalized_at": {"type": "string", "format": "date-time"},
-        "timezone": {"type": ["string", "null"]},
-        "obligation_id": {"type": ["string", "null"], "format": "uuid"},
-        "source_clause": {
-          "oneOf": [
-            {"$ref": "#/$defs/clauseReference"},
-            {"type": "null"}
+        "record_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "record_type": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "factual_description": {
+          "type": "string"
+        },
+        "interpretation_text": {
+          "type": [
+            "string",
+            "null"
           ]
         },
-        "corrects_record_id": {"type": ["string", "null"], "format": "uuid"},
-        "record_hash": {"$ref": "#/$defs/sha256"},
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finalized_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "timezone": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "obligation_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "corrects_record_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "record_hash": {
+          "$ref": "#/$defs/sha256"
+        },
         "previous_chain_hash": {
           "oneOf": [
-            {"$ref": "#/$defs/sha256"},
-            {"type": "null"}
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
-        "chain_hash": {"$ref": "#/$defs/sha256"},
+        "chain_hash": {
+          "$ref": "#/$defs/sha256"
+        },
         "signature": {
           "oneOf": [
-            {"$ref": "#/$defs/signature"},
-            {"type": "null"}
+            {
+              "$ref": "#/$defs/signature"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "evidence_ids": {
           "type": "array",
-          "items": {"type": "string", "format": "uuid"},
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
           "uniqueItems": true
+        },
+        "source_clause_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
         }
       }
     },
@@ -264,75 +534,312 @@
         "byte_size",
         "sha256",
         "imported_at",
-        "verification_state"
+        "verification_state",
+        "provenance_status"
       ],
       "properties": {
-        "evidence_id": {"type": "string", "format": "uuid"},
+        "evidence_id": {
+          "type": "string",
+          "format": "uuid"
+        },
         "asset_role": {
           "type": "string",
-          "enum": ["original", "preview", "thumbnail", "ocr_rendering", "redacted_copy", "annotated_copy", "other_derivative"]
+          "enum": [
+            "original",
+            "preview",
+            "thumbnail",
+            "ocr_rendering",
+            "redacted_copy",
+            "annotated_copy",
+            "other_derivative"
+          ]
         },
-        "derived_from_evidence_id": {"type": ["string", "null"], "format": "uuid"},
+        "derived_from_evidence_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
         "capture_method": {
           "type": "string",
-          "enum": ["in_app_capture", "external_import", "generated_by_tekmerion"]
+          "enum": [
+            "in_app_capture",
+            "external_import",
+            "generated_by_tekmerion"
+          ]
         },
-        "package_path": {"type": "string"},
-        "original_filename": {"type": ["string", "null"]},
-        "mime_type": {"type": "string"},
-        "byte_size": {"type": "integer", "minimum": 0},
-        "sha256": {"$ref": "#/$defs/sha256"},
-        "captured_at": {"type": ["string", "null"], "format": "date-time"},
-        "imported_at": {"type": "string", "format": "date-time"},
+        "package_path": {
+          "type": "string"
+        },
+        "original_filename": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mime_type": {
+          "type": "string"
+        },
+        "byte_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "captured_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "imported_at": {
+          "type": "string",
+          "format": "date-time"
+        },
         "verification_state": {
           "type": "string",
-          "enum": ["verified_unchanged_since_ingestion", "verification_failed", "not_verified"]
+          "enum": [
+            "verified_unchanged_since_ingestion",
+            "verification_failed",
+            "not_verified"
+          ]
         },
-        "pre_ingestion_history_known": {"type": "boolean"},
-        "source_metadata": {"type": "object", "additionalProperties": true}
+        "source_metadata": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "provenance_status": {
+          "type": "string",
+          "enum": [
+            "captured_in_app",
+            "pre_ingestion_history_unknown",
+            "imported_with_external_capture_metadata"
+          ]
+        }
       }
     },
     "packageFile": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["path", "media_type", "byte_size", "sha256"],
+      "required": [
+        "path",
+        "media_type",
+        "byte_size",
+        "sha256"
+      ],
       "properties": {
-        "path": {"type": "string"},
-        "media_type": {"type": "string"},
-        "byte_size": {"type": "integer", "minimum": 0},
-        "sha256": {"$ref": "#/$defs/sha256"}
+        "path": {
+          "type": "string"
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "byte_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     },
     "signature": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["algorithm", "key_id", "signature_base64", "verification_status"],
+      "required": [
+        "algorithm",
+        "key_id",
+        "signature_base64",
+        "verification_status"
+      ],
       "properties": {
-        "algorithm": {"type": "string"},
-        "key_id": {"type": "string"},
-        "signature_base64": {"type": "string"},
-        "public_key_path": {"type": ["string", "null"]},
-        "certificate_path": {"type": ["string", "null"]},
-        "hardware_backed": {"type": ["boolean", "null"]},
-        "attestation_available": {"type": ["boolean", "null"]},
+        "algorithm": {
+          "type": "string"
+        },
+        "key_id": {
+          "type": "string"
+        },
+        "signature_base64": {
+          "type": "string"
+        },
+        "public_key_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "certificate_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hardware_backed": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "attestation_available": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
         "verification_status": {
           "type": "string",
-          "enum": ["verified", "failed", "not_run", "not_verifiable"]
+          "enum": [
+            "verified",
+            "failed",
+            "not_run",
+            "not_verifiable"
+          ]
         }
       }
     },
     "trustedTimestamp": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status"],
+      "required": [
+        "status"
+      ],
       "properties": {
         "status": {
           "type": "string",
-          "enum": ["not_present", "present_unverified", "verified", "failed"]
+          "enum": [
+            "not_present",
+            "present_unverified",
+            "verified",
+            "failed"
+          ]
         },
-        "authority": {"type": ["string", "null"]},
-        "token_path": {"type": ["string", "null"]},
-        "verified_at": {"type": ["string", "null"], "format": "date-time"}
+        "authority": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "token_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verified_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "clause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clause_id",
+        "agreement_version_id",
+        "source_text",
+        "review_state",
+        "created_at"
+      ],
+      "properties": {
+        "clause_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "agreement_version_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "parent_clause_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "clause_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "heading": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_text": {
+          "type": "string"
+        },
+        "normalized_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_start": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "page_end": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "character_start": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "character_end": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "parse_confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "review_state": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "confirmed",
+            "corrected",
+            "rejected"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "confirmed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
       }
     }
   }

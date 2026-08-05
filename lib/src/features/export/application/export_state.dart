@@ -17,12 +17,14 @@ class ExportStatus {
     this.progress = 0.0,
     this.message,
     this.exportPackageId,
+    this.packageFilePath,
     this.error,
   });
   final ExportState state;
   final double progress;
   final String? message;
   final String? exportPackageId;
+  final String? packageFilePath;
   final String? error;
 
   ExportStatus copyWith({
@@ -30,6 +32,7 @@ class ExportStatus {
     double? progress,
     String? message,
     String? exportPackageId,
+    String? packageFilePath,
     String? error,
   }) {
     return ExportStatus(
@@ -37,6 +40,7 @@ class ExportStatus {
       progress: progress ?? this.progress,
       message: message ?? this.message,
       exportPackageId: exportPackageId ?? this.exportPackageId,
+      packageFilePath: packageFilePath ?? this.packageFilePath,
       error: error ?? this.error,
     );
   }
