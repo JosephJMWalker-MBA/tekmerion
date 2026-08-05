@@ -18,6 +18,8 @@
 ### Added
 - Phase 1G: Complete Obligation
 - The user can select a confirmed obligation, upload evidence of completion (e.g., a receipt), and attach a note to finalize it into an immutable record.
+- **Phase 1I**: Record Package Export
+- Generate a self-contained ZIP archive with a cryptographic manifest, human-readable PDF, and original files.
 - Added `CompleteObligationService` for securely drafting and finalizing completion records.
 - Added `CompleteObligationScreen` for the user interface of completing an obligation.
 - Added `ObligationsListScreen` to see a list of obligations (with fulfilled obligations sorted at the bottom).
@@ -34,3 +36,11 @@
 - Added `AgreementTimelineScreen` with timeline rendering, grouping events by Month and Year.
 - Integrated the View Timeline action into the Agreement Home Screen.
 - Extended the test suite, achieving 68 passing tests, with no analyzer warnings.
+
+
+## [0.0.9] - 2026-08-05
+
+### Added
+- **Phase 1I implementation and functional audit checkpoint**
+- Implemented and tested: Record Package generation, cryptographic staging, human-readable PDF, schema validation.
+- Deferred: UI integration, large-file benchmarking.

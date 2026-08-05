@@ -55,3 +55,31 @@
 - Added `AgreementTimelineScreen` with timeline rendering, grouping events by Month and Year.
 - Integrated the View Timeline action into the Agreement Home Screen.
 - Extended the test suite, achieving 68 passing tests, with no analyzer warnings.
+
+## Phase 1I Status
+- **Phase 1H:** Agreement Timeline (COMPLETED)
+- **Phase 1I:** Record Package Export (IMPLEMENTATION AND FUNCTIONAL AUDIT CHECKPOINT)
+
+## Current Phase
+- **Phase 1I:** Record Package Export
+
+## Phase 1I Implementation and Functional Audit Checkpoint
+
+**Implemented and Tested:**
+- RecordPackageExportService with local filesystem staging and ZIP creation.
+- ExportManifest domain structures, serialization, and JSON schema validation against Phase 1I requirements.
+- Schedule rule export into `data/schedule-rules.json`.
+- Cryptographic source integrity failing closed on invalid sources.
+- Generation of human-readable presentation PDF (`record.pdf`) from manifest facts.
+
+**Implemented but not manually verified:**
+- Complete agreement chain processing on real devices.
+
+**Deferred:**
+- UI integration for triggering export and handling loading states.
+- Large-file benchmarking and performance profiling for export generation.
+- Full JSON Schema Draft 2020-12 validator support in Dart (currently using basic validation).
+
+**Known Limitations:**
+- The generated ZIP archive is not inherently immutable.
+- The export package provides verifiable cryptographic hashes of original artifacts, but does not guarantee legal admissibility or authenticity of the underlying claims on its own.
