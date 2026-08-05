@@ -43,4 +43,5 @@
 ### Added
 - **Phase 1I implementation and functional audit checkpoint**
 - Implemented and tested: Record Package generation, cryptographic staging, human-readable PDF, schema validation.
-- Deferred: UI integration, large-file benchmarking.
+- Implemented and tested: UI integration for triggering export, handling stream lifecycles, and invoking native share intents.
+- Deferred: Large-file benchmarking.

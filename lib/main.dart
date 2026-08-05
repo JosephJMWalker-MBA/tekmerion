@@ -1,6 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tekmerion/src/core/integrity/sha256_integrity_engine.dart';
+import 'package:tekmerion/src/features/export/application/export_share_adapter.dart';
+import 'package:tekmerion/src/features/export/application/record_package_export_service.dart';
+import 'package:tekmerion/src/features/export/application/record_pdf_generator.dart';
+import 'package:tekmerion/src/features/export/data/sqlite_export_package_repository.dart';
 import 'package:tekmerion/src/features/record/application/complete_obligation_service.dart';
 import 'package:tekmerion/src/features/record/data/sqlite_record_repository.dart';
 import 'package:tekmerion/src/features/timeline/application/agreement_timeline_service.dart';
@@ -53,6 +57,19 @@ void main() async {
     timelineRepository: timelineRepository,
   );
 
+  final exportPackageRepository = SqliteExportPackageRepository(db);
+  final exportShareAdapter = SharePlusExportAdapter();
+  final exportService = RecordPackageExportService(
+    agreementRepo: agreementRepository,
+    clauseRepo: clauseRepository,
+    obligationRepo: obligationRepository,
+    recordRepo: recordRepository,
+    timelineRepo: timelineRepository,
+    evidenceStorage: evidenceStorage,
+    exportRepo: exportPackageRepository,
+    pdfGenerator: RecordPdfGenerator(),
+  );
+
   runApp(
     TekmerionApp(
       importService: importService,
@@ -61,6 +78,9 @@ void main() async {
       evidenceStorage: evidenceStorage,
       completeObligationService: completeObligationService,
       timelineService: timelineService,
+      exportService: exportService,
+      exportPackageRepository: exportPackageRepository,
+      exportShareAdapter: exportShareAdapter,
     ),
   );
 }

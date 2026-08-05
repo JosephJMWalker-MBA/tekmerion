@@ -166,7 +166,7 @@ void main() {
       recordRepo: FakeRecordRepository(),
       timelineRepo: FakeTimelineRepository(),
       evidenceStorage: FakeEvidenceStorage(
-          {'66666666-6666-6666-6666-666666666661': agreementBytes}),
+          {'66666666-6666-6666-6666-666666666661': agreementBytes},),
       exportRepo: FakeExportPackageRepository(),
       pdfGenerator: FakeRecordPdfGenerator(),
     );
