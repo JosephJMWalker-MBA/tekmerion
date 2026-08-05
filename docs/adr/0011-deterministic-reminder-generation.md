@@ -46,7 +46,7 @@ We will adopt a pure, functional approach to reminder candidate generation.
 
 ## Phase 1J Status
 
-**Implemented and tested:**
+**Implemented and tested (1J-A & 1J-B):**
 - pure deterministic ReminderEngine
 - ReminderInstance persistence
 - non-destructive v4-to-v5 migration
@@ -55,8 +55,14 @@ We will adopt a pure, functional approach to reminder candidate generation.
 - guarded state transitions
 - notification-state separation
 
+**Implemented and tested (1J-C):**
+- pure `ReminderReconciliationPlanner`
+- collision-resilient `NotificationIdGenerator`
+- `ReminderReconciliationService` with single-flight coalescing concurrency
+- atomic canonical transaction execution of `ReconciliationPlan`
+- structured `LocalNotificationAdapter` boundary
+
 **Deferred:**
-- reconciliation
-- operating-system notification scheduling
+- actual operating-system notification plugin (e.g. `flutter_local_notifications`)
 - Today and Upcoming UI
 - Android manual verification

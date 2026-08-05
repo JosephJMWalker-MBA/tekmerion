@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:tekmerion/src/features/reminder/domain/notification_scheduling_state.dart';
+import 'package:tekmerion/src/features/reminder/domain/reconciliation_plan.dart';
 import 'package:tekmerion/src/features/reminder/domain/reminder_instance.dart';
 import 'package:tekmerion/src/features/reminder/domain/reminder_repository.dart';
 import 'package:tekmerion/src/features/reminder/domain/reminder_state.dart';
@@ -271,6 +272,65 @@ class SqliteReminderRepository implements ReminderRepository {
         ReminderState.acknowledged.name,
       ],
     );
+  }
+
+  @override
+  Future<void> applyReconciliationPlan(
+    ReconciliationPlan plan,
+    DateTime appliedAt,
+  ) async {
+    final db = await _getDb();
+    final isoApplied = appliedAt.toUtc().toIso8601String();
+
+    await db.transaction((txn) async {
+      // 1. Handle Inserts
+      for (final op in plan.inserts) {
+        final map = _toMap(op.reminder);
+        map['local_notification_id'] = op.localNotificationId;
+        map['updated_at'] = isoApplied;
+        await txn.insert(
+          'reminders',
+          map,
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+      }
+
+      // 2. Handle Supersessions
+      for (final op in plan.supersedes) {
+        await txn.update(
+          'reminders',
+          {
+            'state': ReminderState.superseded.name,
+            'superseded_at': isoApplied,
+            'updated_at': isoApplied,
+          },
+          where: 'id = ? AND state IN (?, ?)',
+          whereArgs: [
+            op.reminder.id,
+            ReminderState.scheduled.name,
+            ReminderState.acknowledged.name,
+          ],
+        );
+      }
+
+      // 3. Handle Cancellations
+      for (final op in plan.cancels) {
+        await txn.update(
+          'reminders',
+          {
+            'state': ReminderState.cancelled.name,
+            'cancelled_at': isoApplied,
+            'updated_at': isoApplied,
+          },
+          where: 'id = ? AND state IN (?, ?)',
+          whereArgs: [
+            op.reminder.id,
+            ReminderState.scheduled.name,
+            ReminderState.acknowledged.name,
+          ],
+        );
+      }
+    });
   }
 
   Map<String, Object?> _toMap(ReminderInstance reminder) {

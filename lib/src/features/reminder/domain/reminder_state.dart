@@ -21,5 +21,13 @@ enum ReminderState {
   superseded,
 
   /// Terminal state. The reminder window expired without action.
-  expired,
+  expired;
+
+  bool get isTerminal {
+    return this == ReminderState.dismissed ||
+        this == ReminderState.completed ||
+        this == ReminderState.cancelled ||
+        this == ReminderState.superseded ||
+        this == ReminderState.expired;
+  }
 }

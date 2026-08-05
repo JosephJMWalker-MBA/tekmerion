@@ -1,3 +1,4 @@
+import 'package:tekmerion/src/features/reminder/domain/reconciliation_plan.dart';
 import 'package:tekmerion/src/features/reminder/domain/reminder_instance.dart';
 import 'package:tekmerion/src/features/reminder/domain/reminder_state.dart';
 
@@ -67,4 +68,7 @@ abstract class ReminderRepository {
     required String obligationId,
     required DateTime cancelledAt,
   });
+
+  /// Atomically applies a reconciliation plan.
+  Future<void> applyReconciliationPlan(ReconciliationPlan plan, DateTime appliedAt);
 }

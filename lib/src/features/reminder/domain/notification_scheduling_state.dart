@@ -5,4 +5,5 @@ enum NotificationSchedulingState {
   permissionDenied,
   failed,
   cancelled,
+  unavailable,
 }
