@@ -269,9 +269,8 @@ void main() {
         pdfGenerator: FakeRecordPdfGenerator(),
       );
 
-      final statuses = await service
-          .generateCompleteExport(dataset.agreementId)
-          .toList();
+      final statuses =
+          await service.generateCompleteExport(dataset.agreementId).toList();
       final finalStatus = statuses.last;
 
       expect(finalStatus.state, ExportState.completed);

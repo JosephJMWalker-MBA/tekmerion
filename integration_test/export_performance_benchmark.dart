@@ -1,6 +1,6 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:tekmerion/src/features/export/application/export_state.dart';
@@ -8,10 +8,14 @@ import 'package:tekmerion/src/features/export/application/record_package_export_
 
 import '../test/utils/domain_fixture_builder.dart';
 
-Future<void> runBenchmark(String name,
-    {required int agreementMb, required int evidenceMb,}) async {
-  print(
-      '\n--- Running $name Benchmark ($agreementMb MB Agreement, $evidenceMb MB Evidence) ---',);
+Future<void> runBenchmark(
+  String name, {
+  required int agreementMb,
+  required int evidenceMb,
+}) async {
+  debugPrint(
+    '\n--- Running $name Benchmark ($agreementMb MB Agreement, $evidenceMb MB Evidence) ---',
+  );
   final stopwatch = Stopwatch()..start();
 
   final dataset = DomainFixtureBuilder.buildSyntheticExportDataset(
@@ -22,7 +26,10 @@ Future<void> runBenchmark(String name,
 
   final exportService = RecordPackageExportService(
     agreementRepo: FakeAgreementRepository(
-        dataset.agreements, dataset.versions, dataset.evidence,),
+      dataset.agreements,
+      dataset.versions,
+      dataset.evidence,
+    ),
     clauseRepo: FakeClauseRepository(dataset.clauses),
     obligationRepo: FakeObligationRepository(dataset.obligations),
     recordRepo: FakeRecordRepository(dataset.records),
@@ -44,18 +51,21 @@ Future<void> runBenchmark(String name,
 
   if (finalStatus.state != ExportState.completed) {
     throw Exception(
-        'Benchmark $name failed with state ${finalStatus.state.name}: ${finalStatus.error}',);
+      'Benchmark $name failed with state ${finalStatus.state.name}: ${finalStatus.error}',
+    );
   }
 
   stopwatch.stop();
   final zipFile = File(finalStatus.packageFilePath!);
   final sizeBytes = await zipFile.length();
 
-  print('  Result: SUCCESS');
-  print('  Total Time: ${stopwatch.elapsedMilliseconds} ms');
-  print('  ZIP Size: ${(sizeBytes / (1024 * 1024)).toStringAsFixed(2)} MB');
-  print(
-      '  Peak RSS (approx): ${(maxRss / (1024 * 1024)).toStringAsFixed(2)} MB',);
+  debugPrint('  Result: SUCCESS');
+  debugPrint('  Total Time: ${stopwatch.elapsedMilliseconds} ms');
+  debugPrint(
+      '  ZIP Size: ${(sizeBytes / (1024 * 1024)).toStringAsFixed(2)} MB');
+  debugPrint(
+    '  Peak RSS (approx): ${(maxRss / (1024 * 1024)).toStringAsFixed(2)} MB',
+  );
 }
 
 void main() {

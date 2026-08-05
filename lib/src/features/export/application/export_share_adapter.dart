@@ -22,9 +22,11 @@ class SharePlusExportAdapter implements ExportShareAdapter {
     required String mimeType,
   }) async {
     try {
-      final result = await Share.shareXFiles(
-        [XFile(filePath, name: filename, mimeType: mimeType)],
-        text: 'Tekmerion Record Package',
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(filePath, name: filename, mimeType: mimeType)],
+          text: 'Tekmerion Record Package',
+        ),
       );
 
       if (result.status == ShareResultStatus.success) {

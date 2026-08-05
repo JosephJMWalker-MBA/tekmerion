@@ -24,41 +24,50 @@ void main() {
   });
 
   test(
-      'Export completes synthetic multi-megabyte package and cleans up staging',
-      () async {
-    final dataset = DomainFixtureBuilder.buildSyntheticExportDataset(
-      agreementMb: 1,
-      evidenceMb: 4,
-      numEvidenceFiles: 5,
-    );
+    'Export completes synthetic multi-megabyte package and cleans up staging',
+    () async {
+      final dataset = DomainFixtureBuilder.buildSyntheticExportDataset(
+        agreementMb: 1,
+        evidenceMb: 4,
+        numEvidenceFiles: 5,
+      );
 
-    final exportService = RecordPackageExportService(
-      agreementRepo: FakeAgreementRepository(
-          dataset.agreements, dataset.versions, dataset.evidence,),
-      clauseRepo: FakeClauseRepository(dataset.clauses),
-      obligationRepo: FakeObligationRepository(dataset.obligations),
-      recordRepo: FakeRecordRepository(dataset.records),
-      timelineRepo: FakeTimelineRepository(dataset.timelineEvents),
-      exportRepo: FakeExportPackageRepository(),
-      evidenceStorage: FakeEvidenceStorage(dataset.fileData),
-      pdfGenerator: FakeRecordPdfGenerator(),
-    );
+      final exportService = RecordPackageExportService(
+        agreementRepo: FakeAgreementRepository(
+          dataset.agreements,
+          dataset.versions,
+          dataset.evidence,
+        ),
+        clauseRepo: FakeClauseRepository(dataset.clauses),
+        obligationRepo: FakeObligationRepository(dataset.obligations),
+        recordRepo: FakeRecordRepository(dataset.records),
+        timelineRepo: FakeTimelineRepository(dataset.timelineEvents),
+        exportRepo: FakeExportPackageRepository(),
+        evidenceStorage: FakeEvidenceStorage(dataset.fileData),
+        pdfGenerator: FakeRecordPdfGenerator(),
+      );
 
-    ExportStatus finalStatus = const ExportStatus();
-    final stream = exportService.generateCompleteExport(dataset.agreementId);
-    await for (final status in stream) {
-      finalStatus = status;
-    }
+      ExportStatus finalStatus = const ExportStatus();
+      final stream = exportService.generateCompleteExport(dataset.agreementId);
+      await for (final status in stream) {
+        finalStatus = status;
+      }
 
-    expect(finalStatus.state, ExportState.completed);
+      expect(finalStatus.state, ExportState.completed);
 
-    final zipFile = File(finalStatus.packageFilePath!);
-    expect(zipFile.existsSync(), isTrue);
-    expect(zipFile.lengthSync(), greaterThan(0));
+      final zipFile = File(finalStatus.packageFilePath!);
+      expect(zipFile.existsSync(), isTrue);
+      expect(zipFile.lengthSync(), greaterThan(0));
 
-    final stagingDir = Directory(
-        '${Directory.systemTemp.path}/_export_staging_${dataset.agreementId}',);
-    expect(stagingDir.existsSync(), isFalse,
-        reason: 'Staging directory must be cleaned up on success',);
-  }, timeout: const Timeout(Duration(minutes: 2)),);
+      final stagingDir = Directory(
+        '${Directory.systemTemp.path}/_export_staging_${dataset.agreementId}',
+      );
+      expect(
+        stagingDir.existsSync(),
+        isFalse,
+        reason: 'Staging directory must be cleaned up on success',
+      );
+    },
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
 }

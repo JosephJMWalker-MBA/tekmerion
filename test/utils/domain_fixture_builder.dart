@@ -50,7 +50,8 @@ class DomainFixtureBuilder {
     int numEvidenceFiles = 1,
   }) {
     final agreementBytes = Uint8List.fromList(
-        List<int>.filled(agreementMb > 0 ? agreementMb * 1024 * 1024 : 10, 65),);
+      List<int>.filled(agreementMb > 0 ? agreementMb * 1024 * 1024 : 10, 65),
+    );
     final agHash = sha256.convert(agreementBytes).toString();
 
     final bytesPerEvidence =
@@ -108,13 +109,15 @@ class DomainFixtureBuilder {
       );
       evidenceMap[evId] = env;
       fileData[evId] = evidenceBytes;
-      recEvRefs.add(EvidenceReference(
-        evidenceId: env.evidenceId,
-        sha256: env.sha256,
-        captureMethod: env.captureMethod,
-        assetRole: env.assetRole,
-        bytesAvailable: true,
-      ),);
+      recEvRefs.add(
+        EvidenceReference(
+          evidenceId: env.evidenceId,
+          sha256: env.sha256,
+          captureMethod: env.captureMethod,
+          assetRole: env.assetRole,
+          bytesAvailable: true,
+        ),
+      );
     }
 
     final clause1 = Clause(
@@ -156,8 +159,10 @@ class DomainFixtureBuilder {
       evidence: recEvRefs,
       state: RecordState.finalized,
       finalizedAt: DateTime.now().toUtc(),
-      recordHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-      chainHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      recordHash:
+          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      chainHash:
+          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
     );
 
     return ExportDataset(
@@ -190,13 +195,13 @@ class FakeAgreementRepository implements AgreementRepository {
   Future<EvidenceEnvelope?> getEvidenceAssetById(String id) async =>
       evidence[id];
   @override
-  Future<void> importAgreementTransaction(
-      {required EvidenceEnvelope evidence,
-      required Agreement agreement,
-      required AgreementVersion version,}) async {}
+  Future<void> importAgreementTransaction({
+    required EvidenceEnvelope evidence,
+    required Agreement agreement,
+    required AgreementVersion version,
+  }) async {}
 
   // Adding getAgreementById just in case other tests need it
-  @override
   Future<Agreement?> getAgreementById(String id) async {
     try {
       return agreements.firstWhere((a) => a.id == id);
