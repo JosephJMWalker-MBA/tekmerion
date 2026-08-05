@@ -41,6 +41,16 @@
 ## [0.0.9] - 2026-08-05
 
 ### Added
+- **Phase 1J-A & 1J-B: Deterministic Reminder Engine & Persistence**
+- Implemented and tested: pure deterministic ReminderEngine
+- Implemented and tested: ReminderInstance persistence
+- Implemented and tested: non-destructive v4-to-v5 migration
+- Implemented and tested: derived due status
+- Implemented and tested: occurrence identity
+- Implemented and tested: guarded state transitions
+- Implemented and tested: notification-state separation
+- Deferred: reconciliation, operating-system notification scheduling, Today and Upcoming UI, Android manual verification
+
 - **Phase 1I implementation and functional audit checkpoint**
 - Implemented and tested: Record Package generation, cryptographic staging, human-readable PDF, schema validation.
 - Implemented and tested: UI integration for triggering export, handling stream lifecycles, and invoking native share intents.

@@ -57,6 +57,18 @@ Prove the complete product loop with one agreement, one obligation, one reminder
 - Manual clause selection if automated segmentation is not ready
 - One obligation confirmation flow
 - One deterministic schedule rule
+- **Phase 1J:** Reminder Engine
+  - [x] pure deterministic ReminderEngine
+  - [x] ReminderInstance persistence
+  - [x] non-destructive v4-to-v5 migration
+  - [x] derived due status
+  - [x] occurrence identity
+  - [x] guarded state transitions
+  - [x] notification-state separation
+  - [ ] reconciliation
+  - [ ] operating-system notification scheduling
+  - [ ] Today and Upcoming UI
+  - [ ] Android manual verification
 - Local notification
 - Record drafting and finalization
 - Photo or file attachment

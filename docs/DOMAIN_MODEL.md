@@ -233,6 +233,10 @@ The v1 implementation should store structured fields rather than opaque natural-
 
 A generated or manually created prompt tied to an obligation.
 
+**Phase 1J-B Status:**
+**Implemented and tested:** pure deterministic ReminderEngine, ReminderInstance persistence, non-destructive v4-to-v5 migration, derived due status, occurrence identity, guarded state transitions, notification-state separation.
+**Deferred:** reconciliation, operating-system notification scheduling, Today and Upcoming UI, Android manual verification.
+
 Fields:
 
 - `id`

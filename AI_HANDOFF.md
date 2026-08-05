@@ -60,8 +60,26 @@
 - **Phase 1H:** Agreement Timeline (COMPLETED)
 - **Phase 1I:** Record Package Export (IMPLEMENTATION AND FUNCTIONAL AUDIT CHECKPOINT)
 
+## Phase 1J Status
+- **Phase 1J-A & 1J-B:** Deterministic Reminder Engine & Persistence (IMPLEMENTED)
+
+**Implemented and tested:**
+- pure deterministic ReminderEngine
+- ReminderInstance persistence
+- non-destructive v4-to-v5 migration
+- derived due status
+- occurrence identity
+- guarded state transitions
+- notification-state separation
+
+**Deferred:**
+- reconciliation
+- operating-system notification scheduling
+- Today and Upcoming UI
+- Android manual verification
+
 ## Current Phase
-- **Phase 1I:** Record Package Export
+- **Phase 1J:** Reminder Engine (Reconciliation)
 
 ## Phase 1I Implementation and Functional Audit Checkpoint
 
