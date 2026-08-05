@@ -2,21 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
-import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:path/path.dart' as p;
-import 'package:tekmerion/src/features/agreement/domain/agreement.dart';
-import 'package:tekmerion/src/features/agreement/domain/agreement_version.dart';
 import 'package:tekmerion/src/features/export/application/export_state.dart';
 import 'package:tekmerion/src/features/export/application/record_package_export_service.dart';
 import 'package:tekmerion/src/features/export/domain/export_manifest.dart';
 import 'package:tekmerion/src/features/export/domain/export_manifest_validator.dart';
-import 'package:tekmerion/src/features/record/domain/evidence_envelope.dart';
-import 'package:tekmerion/src/features/record/domain/evidence_reference.dart';
-
-import 'record_package_export_service_test.dart' as fakes;
+import '../../utils/domain_fixture_builder.dart';
 
 void main() {
   group('ExportManifest Schema Validation', () {
@@ -254,57 +248,29 @@ void main() {
         },
       );
 
-      final agreementBytes = Uint8List.fromList([10, 20, 30, 40]);
-      final originalHash = sha256.convert(agreementBytes).toString();
-
-      final agreement = Agreement(
-        id: '11111111-1111-1111-1111-111111111111',
-        title: 'Lease',
-        agreementType: 'lease',
-        status: AgreementStatus.active,
-        createdAt: DateTime.now(),
-      );
-
-      final version = AgreementVersion(
-        id: '22222222-2222-2222-2222-222222222222',
-        agreementId: '11111111-1111-1111-1111-111111111111',
-        sourceEvidenceAssetId: '66666666-6666-6666-6666-666666666661',
-        versionLabel: 'Original',
-        status: AgreementVersionStatus.active,
-        importedAt: DateTime.now(),
-      );
-
-      final evidenceEnvelope = EvidenceEnvelope(
-        evidenceId: '66666666-6666-6666-6666-666666666661',
-        originalFilename: 'lease.pdf',
-        mimeType: 'application/pdf',
-        byteSize: agreementBytes.length,
-        sha256: originalHash,
-        captureMethod: EvidenceCaptureMethod.externalImport,
-        ingestedAt: DateTime.now(),
-        storageIdentifier: '66666666-6666-6666-6666-666666666661',
-        assetRole: EvidenceAssetRole.original,
+      final dataset = DomainFixtureBuilder.buildSyntheticExportDataset(
+        agreementMb: 0,
+        evidenceMb: 0,
+        numEvidenceFiles: 1,
       );
 
       final service = RecordPackageExportService(
-        agreementRepo: fakes.FakeAgreementRepository(
-          [agreement],
-          [version],
-          {'66666666-6666-6666-6666-666666666661': evidenceEnvelope},
+        agreementRepo: FakeAgreementRepository(
+          dataset.agreements,
+          dataset.versions,
+          dataset.evidence,
         ),
-        clauseRepo: fakes.FakeClauseRepository(),
-        obligationRepo: fakes.FakeObligationRepository(),
-        recordRepo: fakes.FakeRecordRepository(),
-        timelineRepo: fakes.FakeTimelineRepository(),
-        evidenceStorage: fakes.FakeEvidenceStorage(
-          {'66666666-6666-6666-6666-666666666661': agreementBytes},
-        ),
-        exportRepo: fakes.FakeExportPackageRepository(),
-        pdfGenerator: fakes.FakeRecordPdfGenerator(),
+        clauseRepo: FakeClauseRepository(dataset.clauses),
+        obligationRepo: FakeObligationRepository(dataset.obligations),
+        recordRepo: FakeRecordRepository(dataset.records),
+        timelineRepo: FakeTimelineRepository(dataset.timelineEvents),
+        evidenceStorage: FakeEvidenceStorage(dataset.fileData),
+        exportRepo: FakeExportPackageRepository(),
+        pdfGenerator: FakeRecordPdfGenerator(),
       );
 
       final statuses = await service
-          .generateCompleteExport('11111111-1111-1111-1111-111111111111')
+          .generateCompleteExport(dataset.agreementId)
           .toList();
       final finalStatus = statuses.last;
 

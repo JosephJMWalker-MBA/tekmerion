@@ -203,7 +203,7 @@ class RecordPackageExportService {
           EvidenceInfo(
             evidenceId: evId,
             assetRole: evEnvelope.assetRole.name,
-            captureMethod: evEnvelope.captureMethod.name,
+            captureMethod: evEnvelope.captureMethod == EvidenceCaptureMethod.externalImport ? 'external_import' : 'in_app_capture',
             packagePath: 'evidence/$evId.bin',
             mimeType: 'application/octet-stream',
             byteSize: evBytes.length,

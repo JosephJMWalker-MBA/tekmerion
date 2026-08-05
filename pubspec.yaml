@@ -24,6 +24,8 @@ dependencies:
   share_plus: ^12.0.2
   json_schema: any
 dev_dependencies:
+  integration_test:
+    sdk: flutter
   flutter_test:
     sdk: flutter
   sqflite_common_ffi: ^2.4.2
