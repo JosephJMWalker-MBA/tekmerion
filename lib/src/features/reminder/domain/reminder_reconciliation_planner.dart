@@ -17,16 +17,17 @@ class ReminderReconciliationPlanner {
     required Set<String> supersededScheduleRuleIds,
   }) {
     final operations = <ReconciliationOperation>[];
-    
+
     final persistedByOccurrence = {
       for (final r in persistedReminders) r.occurrenceKey: r,
     };
-    
+
     // We must track used IDs to avoid collisions among both preserved and newly inserted
     final usedNotificationIds = <int>{};
     for (final r in persistedReminders) {
       if (r.localNotificationId != null &&
-          (r.state == ReminderState.scheduled || r.state == ReminderState.acknowledged)) {
+          (r.state == ReminderState.scheduled ||
+              r.state == ReminderState.acknowledged)) {
         usedNotificationIds.add(r.localNotificationId!);
       }
     }
@@ -34,25 +35,30 @@ class ReminderReconciliationPlanner {
     // 1. Process all existing persisted reminders first to see what should be preserved, superseded, or cancelled.
     for (final persisted in persistedReminders) {
       // Historical or terminal reminders are left unchanged.
-      if (persisted.state.isTerminal || persisted.remindAt.isBefore(currentUtc)) {
-        operations.add(ReconciliationOperation(
-          reminder: persisted,
-          type: ReconciliationOperationType.leaveHistoricalUnchanged,
-          reason: persisted.state.isTerminal
-              ? ReconciliationReasonCode.terminalHistoryPreserved
-              : ReconciliationReasonCode.occurrenceBeforeNowPreserved,
-          localNotificationId: persisted.localNotificationId,
-        ),);
+      if (persisted.state.isTerminal ||
+          persisted.remindAt.isBefore(currentUtc)) {
+        operations.add(
+          ReconciliationOperation(
+            reminder: persisted,
+            type: ReconciliationOperationType.leaveHistoricalUnchanged,
+            reason: persisted.state.isTerminal
+                ? ReconciliationReasonCode.terminalHistoryPreserved
+                : ReconciliationReasonCode.occurrenceBeforeNowPreserved,
+            localNotificationId: persisted.localNotificationId,
+          ),
+        );
         continue;
       }
 
       // Check for fulfilled obligations
       if (fulfilledObligationIds.contains(persisted.obligationId)) {
-        operations.add(ReconciliationOperation(
-          reminder: persisted,
-          type: ReconciliationOperationType.cancel,
-          reason: ReconciliationReasonCode.obligationFulfilled,
-        ),);
+        operations.add(
+          ReconciliationOperation(
+            reminder: persisted,
+            type: ReconciliationOperationType.cancel,
+            reason: ReconciliationReasonCode.obligationFulfilled,
+          ),
+        );
         continue;
       }
 
@@ -63,38 +69,45 @@ class ReminderReconciliationPlanner {
         // But if the rule is superseded, the candidates should have the new rule ID, not the old one.
         // Wait, the prompt says: "supersede only future scheduled or acknowledged reminders no longer represented by a valid candidate".
         // Let's just check if it's in the candidate list. If not, supersede.
-        operations.add(ReconciliationOperation(
-          reminder: persisted,
-          type: ReconciliationOperationType.supersede,
-          reason: ReconciliationReasonCode.ruleSupersededAndOccurrenceFuture,
-        ),);
+        operations.add(
+          ReconciliationOperation(
+            reminder: persisted,
+            type: ReconciliationOperationType.supersede,
+            reason: ReconciliationReasonCode.ruleSupersededAndOccurrenceFuture,
+          ),
+        );
         continue;
       }
-      
+
       // If none of the above, we need to check if a candidate matches it to preserve it.
-      // Or if it was generated before but there is no candidate now (maybe the rule changed 
+      // Or if it was generated before but there is no candidate now (maybe the rule changed
       // but it wasn't in superseded rules list?). In a pure engine, if an active future reminder
       // doesn't have a matching candidate and its obligation is not fulfilled, it might be orphaned.
-      // We will preserve it if there is a matching candidate. 
-      // Wait, if it has a matching candidate, we preserve it. If it doesn't have a matching candidate 
+      // We will preserve it if there is a matching candidate.
+      // Wait, if it has a matching candidate, we preserve it. If it doesn't have a matching candidate
       // but isn't flagged as superseded or cancelled, we should still probably supersede/cancel it?
       // The instructions say "New candidate: insert if absent; Matching identity: preserve."
       // Let's just preserve it if it matches a candidate.
-      if (candidateReminders.any((c) => c.occurrenceKey == persisted.occurrenceKey)) {
-        operations.add(ReconciliationOperation(
-          reminder: persisted,
-          type: ReconciliationOperationType.preserve,
-          reason: ReconciliationReasonCode.occurrenceIdentityMatched,
-          localNotificationId: persisted.localNotificationId,
-        ),);
+      if (candidateReminders
+          .any((c) => c.occurrenceKey == persisted.occurrenceKey)) {
+        operations.add(
+          ReconciliationOperation(
+            reminder: persisted,
+            type: ReconciliationOperationType.preserve,
+            reason: ReconciliationReasonCode.occurrenceIdentityMatched,
+            localNotificationId: persisted.localNotificationId,
+          ),
+        );
       } else {
         // If it's a future reminder that is not in the candidate list and not superseded/cancelled explicitly,
         // it means the rule generated different candidates (e.g. date shifted). We supersede it.
-        operations.add(ReconciliationOperation(
-          reminder: persisted,
-          type: ReconciliationOperationType.supersede,
-          reason: ReconciliationReasonCode.ruleSupersededAndOccurrenceFuture,
-        ),);
+        operations.add(
+          ReconciliationOperation(
+            reminder: persisted,
+            type: ReconciliationOperationType.supersede,
+            reason: ReconciliationReasonCode.ruleSupersededAndOccurrenceFuture,
+          ),
+        );
       }
     }
 
@@ -104,9 +117,10 @@ class ReminderReconciliationPlanner {
         // It's a new candidate, we need to allocate a notification ID.
         int attempt = 0;
         int? assignedId;
-        
+
         while (attempt < maxIdAttempts) {
-          final id = NotificationIdGenerator.generateId(candidate.occurrenceKey, attempt: attempt);
+          final id = NotificationIdGenerator.generateId(candidate.occurrenceKey,
+              attempt: attempt);
           if (!usedNotificationIds.contains(id)) {
             assignedId = id;
             usedNotificationIds.add(id);
@@ -114,17 +128,20 @@ class ReminderReconciliationPlanner {
           }
           attempt++;
         }
-        
+
         if (assignedId == null) {
-          throw StateError('Failed to allocate a unique notification ID for ${candidate.occurrenceKey} after $maxIdAttempts attempts.');
+          throw StateError(
+              'Failed to allocate a unique notification ID for ${candidate.occurrenceKey} after $maxIdAttempts attempts.');
         }
-        
-        operations.add(ReconciliationOperation(
-          reminder: candidate,
-          type: ReconciliationOperationType.insert,
-          reason: ReconciliationReasonCode.candidateMissingFromPersistence,
-          localNotificationId: assignedId,
-        ),);
+
+        operations.add(
+          ReconciliationOperation(
+            reminder: candidate,
+            type: ReconciliationOperationType.insert,
+            reason: ReconciliationReasonCode.candidateMissingFromPersistence,
+            localNotificationId: assignedId,
+          ),
+        );
       }
     }
 

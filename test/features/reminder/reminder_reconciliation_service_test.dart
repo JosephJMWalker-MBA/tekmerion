@@ -16,15 +16,17 @@ class FakeLocalNotificationAdapter implements LocalNotificationAdapter {
   bool shouldFailSchedule = false;
   int scheduleCallCount = 0;
   int cancelCallCount = 0;
-  
+
   @override
-  Future<NotificationPermissionState> inspectPermissionState() async => permission;
+  Future<NotificationPermissionState> inspectPermissionState() async =>
+      permission;
 
   @override
   Future<NotificationPermissionState> requestPermission() async => permission;
 
   @override
-  Future<NotificationSchedulingState> scheduleNotification(NotificationScheduleRequest request) async {
+  Future<NotificationSchedulingState> scheduleNotification(
+      NotificationScheduleRequest request) async {
     scheduleCallCount++;
     if (shouldFailSchedule) {
       throw Exception('Platform failure');
@@ -46,9 +48,10 @@ class FakeReminderRepository implements ReminderRepository {
   bool shouldFailApply = false;
   int applyCallCount = 0;
   int markScheduledCallCount = 0;
-  
+
   @override
-  Future<void> applyReconciliationPlan(ReconciliationPlan plan, DateTime appliedAt) async {
+  Future<void> applyReconciliationPlan(
+      ReconciliationPlan plan, DateTime appliedAt) async {
     applyCallCount++;
     if (shouldFailApply) {
       throw Exception('Database failure');
@@ -57,12 +60,18 @@ class FakeReminderRepository implements ReminderRepository {
   }
 
   @override
-  Future<void> markNotificationScheduled({required String reminderId, required int localNotificationId, required DateTime scheduledAt}) async {
+  Future<void> markNotificationScheduled(
+      {required String reminderId,
+      required int localNotificationId,
+      required DateTime scheduledAt}) async {
     markScheduledCallCount++;
   }
 
   @override
-  Future<void> markNotificationFailed({required String reminderId, required String errorCode, required DateTime attemptedAt}) async {}
+  Future<void> markNotificationFailed(
+      {required String reminderId,
+      required String errorCode,
+      required DateTime attemptedAt}) async {}
 
   @override
   Future<void> insertIfAbsent(ReminderInstance reminder) async {}
@@ -71,23 +80,38 @@ class FakeReminderRepository implements ReminderRepository {
   @override
   Future<ReminderInstance?> getById(String id) async => null;
   @override
-  Future<ReminderInstance?> getByOccurrence({required String scheduleRuleId, required String occurrenceKey}) async => null;
+  Future<ReminderInstance?> getByOccurrence(
+          {required String scheduleRuleId,
+          required String occurrenceKey}) async =>
+      null;
   @override
-  Future<List<ReminderInstance>> getForAgreement(String agreementId) async => [];
+  Future<List<ReminderInstance>> getForAgreement(String agreementId) async =>
+      [];
   @override
-  Future<List<ReminderInstance>> getForObligation(String obligationId) async => [];
+  Future<List<ReminderInstance>> getForObligation(String obligationId) async =>
+      [];
   @override
-  Future<List<ReminderInstance>> getForScheduleRule(String scheduleRuleId) async => [];
+  Future<List<ReminderInstance>> getForScheduleRule(
+          String scheduleRuleId) async =>
+      [];
   @override
   Future<List<ReminderInstance>> getToday(DateTime now) async => [];
   @override
   Future<List<ReminderInstance>> getUpcoming(DateTime now) async => [];
   @override
-  Future<void> transitionState({required String reminderId, required ReminderState expectedCurrentState, required ReminderState targetState, required DateTime occurredAt}) async {}
+  Future<void> transitionState(
+      {required String reminderId,
+      required ReminderState expectedCurrentState,
+      required ReminderState targetState,
+      required DateTime occurredAt}) async {}
   @override
-  Future<void> supersedeFutureForRule({required String scheduleRuleId, required int newGenerationVersion, required DateTime supersededAt}) async {}
+  Future<void> supersedeFutureForRule(
+      {required String scheduleRuleId,
+      required int newGenerationVersion,
+      required DateTime supersededAt}) async {}
   @override
-  Future<void> cancelFutureForObligation({required String obligationId, required DateTime cancelledAt}) async {}
+  Future<void> cancelFutureForObligation(
+      {required String obligationId, required DateTime cancelledAt}) async {}
 }
 
 void main() {
@@ -131,14 +155,14 @@ void main() {
 
     test('one run at a time & overlapping calls coalesce', () async {
       inputsDelay = Completer<void>();
-      
+
       // Trigger 1 (starts)
       final p1 = service.triggerReconciliation();
-      
+
       // Trigger 2 and 3 (overlap, should coalesce into 1 follow-up)
       final p2 = service.triggerReconciliation();
       final p3 = service.triggerReconciliation();
-      
+
       // They should return immediately with joinedExistingRun / rerunScheduled
       final r2 = await p2;
       final r3 = await p3;
@@ -147,25 +171,26 @@ void main() {
 
       // Finish first run
       inputsDelay!.complete();
-      
+
       final r1 = await p1;
       expect(r1.type, ReconciliationResultType.rerunScheduled);
-      
+
       // The background follow-up run should happen
       // Wait for event loop to process the unawaited follow-up run
       await Future<void>.delayed(Duration.zero);
-      
-      expect(inputsProvidedCount, equals(2)); // Only 2 runs total, despite 3 triggers
+
+      expect(inputsProvidedCount,
+          equals(2)); // Only 2 runs total, despite 3 triggers
       expect(repository.applyCallCount, equals(2));
     });
 
     test('lock releases after success', () async {
       final r1 = await service.triggerReconciliation();
       expect(r1.type, ReconciliationResultType.completed);
-      
+
       final r2 = await service.triggerReconciliation();
       expect(r2.type, ReconciliationResultType.completed);
-      
+
       expect(inputsProvidedCount, equals(2));
     });
 
@@ -173,11 +198,11 @@ void main() {
       repository.shouldFailApply = true;
       final r1 = await service.triggerReconciliation();
       expect(r1.type, ReconciliationResultType.failed);
-      
+
       repository.shouldFailApply = false;
       final r2 = await service.triggerReconciliation();
       expect(r2.type, ReconciliationResultType.completed);
-      
+
       expect(inputsProvidedCount, equals(2));
     });
   });

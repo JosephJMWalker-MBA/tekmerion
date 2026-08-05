@@ -48,7 +48,8 @@ void main() {
       ];
 
       for (final state in terminalStates) {
-        final r = createReminder(dueAt: DateTime(2026, 1, 1).toUtc(), state: state);
+        final r =
+            createReminder(dueAt: DateTime(2026, 1, 1).toUtc(), state: state);
         expect(
           ReminderTemporalStatusResolver.resolve(
             reminder: r,
@@ -61,7 +62,9 @@ void main() {
     });
 
     test('returns acknowledged for acknowledged state', () {
-      final r = createReminder(dueAt: DateTime(2026, 1, 1).toUtc(), state: ReminderState.acknowledged);
+      final r = createReminder(
+          dueAt: DateTime(2026, 1, 1).toUtc(),
+          state: ReminderState.acknowledged);
       expect(
         ReminderTemporalStatusResolver.resolve(
           reminder: r,
@@ -75,9 +78,9 @@ void main() {
     test('returns overdue if current time is past dueAt + gracePeriod', () {
       final dueAt = DateTime.utc(2026, 8, 1, 10, 0); // Aug 1
       final r = createReminder(dueAt: dueAt);
-      
+
       final currentUtc = DateTime.utc(2026, 8, 4, 10, 0); // Aug 4
-      
+
       expect(
         ReminderTemporalStatusResolver.resolve(
           reminder: r,
@@ -88,12 +91,14 @@ void main() {
       );
     });
 
-    test('returns dueToday if it is due in the past but within grace period', () {
+    test('returns dueToday if it is due in the past but within grace period',
+        () {
       final dueAt = DateTime.utc(2026, 8, 1, 10, 0); // Aug 1
       final r = createReminder(dueAt: dueAt);
-      
-      final currentUtc = DateTime.utc(2026, 8, 2, 10, 0); // Aug 2, not overdue yet
-      
+
+      final currentUtc =
+          DateTime.utc(2026, 8, 2, 10, 0); // Aug 2, not overdue yet
+
       expect(
         ReminderTemporalStatusResolver.resolve(
           reminder: r,
@@ -108,10 +113,10 @@ void main() {
       // dueAt UTC is Aug 2 03:00, which is Aug 1 23:00 in America/New_York
       final dueAt = DateTime.utc(2026, 8, 2, 3, 0);
       final r = createReminder(dueAt: dueAt, timezone: 'America/New_York');
-      
+
       // currentUtc is Aug 1 12:00, which is Aug 1 08:00 in America/New_York
       final currentUtc = DateTime.utc(2026, 8, 1, 12, 0);
-      
+
       expect(
         ReminderTemporalStatusResolver.resolve(
           reminder: r,
@@ -125,9 +130,9 @@ void main() {
     test('returns upcoming if local calendar days are in the future', () {
       final dueAt = DateTime.utc(2026, 8, 15, 10, 0);
       final r = createReminder(dueAt: dueAt);
-      
+
       final currentUtc = DateTime.utc(2026, 8, 1, 10, 0);
-      
+
       expect(
         ReminderTemporalStatusResolver.resolve(
           reminder: r,

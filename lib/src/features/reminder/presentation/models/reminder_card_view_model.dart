@@ -6,7 +6,6 @@ import 'package:tekmerion/src/features/reminder/presentation/models/reminder_tem
 /// Combines the canonical ReminderInstance with joined agreement and obligation facts,
 /// and purely derived presentation state.
 class ReminderCardViewModel {
-
   const ReminderCardViewModel({
     required this.reminderId,
     required this.agreementId,
@@ -30,11 +29,11 @@ class ReminderCardViewModel {
   final String obligationId;
   final String obligationTitle;
   final String? clauseReference;
-  
+
   final DateTime dueAtUtc;
   final String timezone;
   final String dueAtDisplay;
-  
+
   final ReminderState reminderState;
   final ReminderTemporalStatus temporalStatus;
   final NotificationSchedulingState notificationStatus;

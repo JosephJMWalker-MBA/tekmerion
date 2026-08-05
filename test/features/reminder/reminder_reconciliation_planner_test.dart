@@ -9,12 +9,12 @@ void main() {
   group('ReminderReconciliationPlanner', () {
     late ReminderReconciliationPlanner planner;
     late DateTime currentUtc;
-    
+
     setUp(() {
       planner = ReminderReconciliationPlanner();
       currentUtc = DateTime.utc(2026, 1, 1, 12, 0);
     });
-    
+
     ReminderInstance buildReminder({
       required String id,
       required String obligationId,
@@ -56,7 +56,7 @@ void main() {
         fulfilledObligationIds: {},
         supersededScheduleRuleIds: {},
       );
-      
+
       expect(plan.operations, isEmpty);
     });
 
@@ -68,7 +68,7 @@ void main() {
         occurrenceKey: 'key1',
         remindAt: currentUtc.add(const Duration(days: 5)),
       );
-      
+
       final plan = planner.createPlan(
         persistedReminders: [],
         candidateReminders: [candidate],
@@ -78,11 +78,12 @@ void main() {
         fulfilledObligationIds: {},
         supersededScheduleRuleIds: {},
       );
-      
+
       expect(plan.inserts.length, 1);
       final insert = plan.inserts.first;
       expect(insert.reminder, candidate);
-      expect(insert.reason, ReconciliationReasonCode.candidateMissingFromPersistence);
+      expect(insert.reason,
+          ReconciliationReasonCode.candidateMissingFromPersistence);
       expect(insert.localNotificationId, isNotNull);
     });
 
@@ -95,7 +96,7 @@ void main() {
         remindAt: currentUtc.add(const Duration(days: 5)),
         localNotificationId: 12345,
       );
-      
+
       final plan = planner.createPlan(
         persistedReminders: [persisted],
         candidateReminders: [persisted],
@@ -105,12 +106,13 @@ void main() {
         fulfilledObligationIds: {},
         supersededScheduleRuleIds: {},
       );
-      
+
       expect(plan.operations.length, 1);
       expect(plan.preserves.length, 1);
       final preserve = plan.preserves.first;
       expect(preserve.reminder, persisted);
-      expect(preserve.reason, ReconciliationReasonCode.occurrenceIdentityMatched);
+      expect(
+          preserve.reason, ReconciliationReasonCode.occurrenceIdentityMatched);
       expect(preserve.localNotificationId, 12345);
     });
 
@@ -123,7 +125,7 @@ void main() {
         remindAt: currentUtc.add(const Duration(days: 5)),
         localNotificationId: 12345,
       );
-      
+
       final candidate = buildReminder(
         id: 'r2',
         obligationId: 'o1',
@@ -131,7 +133,7 @@ void main() {
         occurrenceKey: 'key2', // different occurrence
         remindAt: currentUtc.add(const Duration(days: 6)),
       );
-      
+
       final plan = planner.createPlan(
         persistedReminders: [persisted],
         candidateReminders: [candidate],
@@ -141,11 +143,12 @@ void main() {
         fulfilledObligationIds: {},
         supersededScheduleRuleIds: {'sr1'},
       );
-      
+
       expect(plan.supersedes.length, 1);
       expect(plan.supersedes.first.reminder, persisted);
-      expect(plan.supersedes.first.reason, ReconciliationReasonCode.ruleSupersededAndOccurrenceFuture);
-      
+      expect(plan.supersedes.first.reason,
+          ReconciliationReasonCode.ruleSupersededAndOccurrenceFuture);
+
       expect(plan.inserts.length, 1);
       expect(plan.inserts.first.reminder, candidate);
     });
@@ -158,7 +161,7 @@ void main() {
         occurrenceKey: 'past_key',
         remindAt: currentUtc.subtract(const Duration(days: 5)),
       );
-      
+
       final futureActive = buildReminder(
         id: 'f1',
         obligationId: 'o1',
@@ -166,7 +169,7 @@ void main() {
         occurrenceKey: 'future_key',
         remindAt: currentUtc.add(const Duration(days: 5)),
       );
-      
+
       final plan = planner.createPlan(
         persistedReminders: [past, futureActive],
         candidateReminders: [],
@@ -176,13 +179,14 @@ void main() {
         fulfilledObligationIds: {'o1'},
         supersededScheduleRuleIds: {},
       );
-      
+
       expect(plan.historicalUnchanged.length, 1);
       expect(plan.historicalUnchanged.first.reminder, past);
-      
+
       expect(plan.cancels.length, 1);
       expect(plan.cancels.first.reminder, futureActive);
-      expect(plan.cancels.first.reason, ReconciliationReasonCode.obligationFulfilled);
+      expect(plan.cancels.first.reason,
+          ReconciliationReasonCode.obligationFulfilled);
     });
 
     test('terminal unmatched reminder preserved', () {
@@ -194,7 +198,7 @@ void main() {
         remindAt: currentUtc.add(const Duration(days: 5)),
         state: ReminderState.completed,
       );
-      
+
       final plan = planner.createPlan(
         persistedReminders: [terminal],
         candidateReminders: [],
@@ -202,11 +206,14 @@ void main() {
         windowStartUtc: currentUtc,
         windowEndUtc: currentUtc.add(const Duration(days: 90)),
         fulfilledObligationIds: {},
-        supersededScheduleRuleIds: {'sr1'}, // Even if rule superseded, terminal state protects it
+        supersededScheduleRuleIds: {
+          'sr1'
+        }, // Even if rule superseded, terminal state protects it
       );
-      
+
       expect(plan.historicalUnchanged.length, 1);
-      expect(plan.historicalUnchanged.first.reason, ReconciliationReasonCode.terminalHistoryPreserved);
+      expect(plan.historicalUnchanged.first.reason,
+          ReconciliationReasonCode.terminalHistoryPreserved);
       expect(plan.supersedes, isEmpty);
     });
   });

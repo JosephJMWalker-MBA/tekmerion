@@ -405,10 +405,14 @@ void main() {
       expect(byId['r_scheduled']!['state'], equals('scheduled'));
       expect(byId['r_scheduled']!['agreement_id'], equals('a1'));
       expect(
-          byId['r_scheduled']!['notification_state'], equals('notRequested'),);
+        byId['r_scheduled']!['notification_state'],
+        equals('notRequested'),
+      );
 
-      expect(byId['r_due']!['state'],
-          equals('scheduled'),); // 'due' maps to 'scheduled'
+      expect(
+        byId['r_due']!['state'],
+        equals('scheduled'),
+      ); // 'due' maps to 'scheduled'
 
       expect(byId['r_acknowledged']!['state'], equals('acknowledged'));
       expect(byId['r_completed']!['state'], equals('completed'));

@@ -43,7 +43,8 @@ void main() {
   group('ReminderCard', () {
     testWidgets('displays correctly with basic data', (tester) async {
       final viewModel = createViewModel();
-      await tester.pumpWidget(buildTestWidget(ReminderCard(viewModel: viewModel)));
+      await tester
+          .pumpWidget(buildTestWidget(ReminderCard(viewModel: viewModel)));
 
       expect(find.text('Test Obligation'), findsOneWidget);
       expect(find.text('Agreement: Test Agreement'), findsOneWidget);
@@ -68,12 +69,22 @@ void main() {
         canComplete: true,
       );
 
-      await tester.pumpWidget(buildTestWidget(ReminderCard(
-        viewModel: viewModel,
-        onAcknowledge: () => acknowledged = true,
-        onDismiss: () => dismissed = true,
-        onComplete: () => completed = true,
-      ),),);
+      await tester.pumpWidget(
+        buildTestWidget(
+          ReminderCard(
+            viewModel: viewModel,
+            onAcknowledge: () async {
+              acknowledged = true;
+            },
+            onDismiss: () async {
+              dismissed = true;
+            },
+            onComplete: () {
+              completed = true;
+            },
+          ),
+        ),
+      );
 
       expect(find.text('Dismiss'), findsOneWidget);
       expect(find.text('Acknowledge'), findsOneWidget);

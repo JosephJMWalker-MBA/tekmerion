@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tekmerion/src/features/reminder/application/reminder_reconciliation_service.dart';
 import 'package:tekmerion/src/features/reminder/application/reminder_view_service.dart';
+import 'package:tekmerion/src/features/reminder/infrastructure/sqlite_reminder_repository.dart';
 import 'package:tekmerion/src/features/reminder/presentation/models/reminder_card_view_model.dart';
 import 'package:tekmerion/src/features/reminder/presentation/widgets/reminder_card.dart';
 
@@ -7,14 +9,18 @@ class TodayRemindersScreen extends StatefulWidget {
   const TodayRemindersScreen({
     super.key,
     required this.viewService,
+    required this.reconciliationService,
     required this.gracePeriod,
+    this.nowUtc,
     this.onAcknowledge,
     this.onDismiss,
     this.onComplete,
   });
 
   final ReminderViewService viewService;
+  final ReminderReconciliationService reconciliationService;
   final Duration gracePeriod;
+  final UtcNow? nowUtc;
   final void Function(ReminderCardViewModel)? onAcknowledge;
   final void Function(ReminderCardViewModel)? onDismiss;
   final void Function(ReminderCardViewModel)? onComplete;
@@ -25,20 +31,88 @@ class TodayRemindersScreen extends StatefulWidget {
 
 class _TodayRemindersScreenState extends State<TodayRemindersScreen> {
   late Future<List<ReminderCardViewModel>> _viewModelsFuture;
+  late UtcNow _nowUtc;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _nowUtc = widget.nowUtc ?? (() => DateTime.now().toUtc());
+    _viewModelsFuture = _reconcileAndLoad();
+  }
+
+  Future<List<ReminderCardViewModel>> _reconcileAndLoad() async {
+    try {
+      await widget.reconciliationService.triggerReconciliation();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content:
+                  Text('Failed to sync latest reminders. Showing local data.')),
+        );
+      }
+    }
+    return widget.viewService.getTodayViewModels(_nowUtc(), widget.gracePeriod);
   }
 
   void _loadData() {
     setState(() {
       _viewModelsFuture = widget.viewService.getTodayViewModels(
-        DateTime.now().toUtc(),
+        _nowUtc(),
         widget.gracePeriod,
       );
     });
+  }
+
+  Future<void> _handleAcknowledge(ReminderCardViewModel vm) async {
+    if (widget.onAcknowledge != null) {
+      widget.onAcknowledge!(vm);
+      return;
+    }
+    await widget.viewService.acknowledgeReminder(vm.reminderId);
+    _loadData(); // Refresh views
+  }
+
+  Future<void> _handleDismiss(ReminderCardViewModel vm) async {
+    if (widget.onDismiss != null) {
+      widget.onDismiss!(vm);
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Dismiss Reminder'),
+        content: const Text(
+          'This will dismiss the reminder for this occurrence. '
+          'The underlying obligation and schedule remain unchanged.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Dismiss'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await widget.viewService.dismissReminder(vm.reminderId);
+      _loadData();
+    }
+  }
+
+  void _handleComplete(ReminderCardViewModel vm) {
+    if (widget.onComplete != null) {
+      widget.onComplete!(vm);
+      return;
+    }
+    // Launch existing complete obligation screen, if we can.
+    // However, CompleteObligationScreen requires services that aren't injected here.
+    // It's probably better to just trigger onComplete callback that AgreementHomeScreen provides.
+    // I'll leave the fallback but it requires AgreementHomeScreen to pass the callback.
   }
 
   @override
@@ -71,9 +145,14 @@ class _TodayRemindersScreenState extends State<TodayRemindersScreen> {
               final vm = viewModels[index];
               return ReminderCard(
                 viewModel: vm,
-                onAcknowledge: widget.onAcknowledge != null ? () => widget.onAcknowledge!(vm) : null,
-                onDismiss: widget.onDismiss != null ? () => widget.onDismiss!(vm) : null,
-                onComplete: widget.onComplete != null ? () => widget.onComplete!(vm) : null,
+                onAcknowledge:
+                    vm.canAcknowledge ? () => _handleAcknowledge(vm) : null,
+                onDismiss: vm.canDismiss ? () => _handleDismiss(vm) : null,
+                onComplete: vm.canComplete
+                    ? () {
+                        _handleComplete(vm);
+                      }
+                    : null,
               );
             },
           );

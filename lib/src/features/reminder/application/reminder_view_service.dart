@@ -21,17 +21,21 @@ class ReminderViewService {
   final ClauseRepository clauseRepository;
 
   /// Retrieves view models for reminders due today or earlier.
-  Future<List<ReminderCardViewModel>> getTodayViewModels(DateTime nowUtc, Duration gracePeriod) async {
+  Future<List<ReminderCardViewModel>> getTodayViewModels(
+      DateTime nowUtc, Duration gracePeriod) async {
     final reminders = await reminderRepository.getToday(nowUtc);
     return _mapToViewModels(reminders, nowUtc, gracePeriod);
   }
 
   /// Retrieves view models for upcoming reminders.
-  Future<List<ReminderCardViewModel>> getUpcomingViewModels(DateTime nowUtc, Duration gracePeriod, {int daysHorizon = 30}) async {
+  Future<List<ReminderCardViewModel>> getUpcomingViewModels(
+      DateTime nowUtc, Duration gracePeriod,
+      {int daysHorizon = 30}) async {
     final allUpcoming = await reminderRepository.getUpcoming(nowUtc);
     // Filter by horizon
     final horizonEnd = nowUtc.add(Duration(days: daysHorizon));
-    final withinHorizon = allUpcoming.where((r) => r.dueAt.isBefore(horizonEnd)).toList();
+    final withinHorizon =
+        allUpcoming.where((r) => r.dueAt.isBefore(horizonEnd)).toList();
     return _mapToViewModels(withinHorizon, nowUtc, gracePeriod);
   }
 
@@ -54,7 +58,9 @@ class ReminderViewService {
         agreementTitle = agreementsCache[reminder.agreementId]!;
       } else {
         final allAgreements = await agreementRepository.getAllAgreements();
-        final agreement = allAgreements.where((a) => a.id == reminder.agreementId).firstOrNull;
+        final agreement = allAgreements
+            .where((a) => a.id == reminder.agreementId)
+            .firstOrNull;
         if (agreement != null) {
           agreementTitle = agreement.title;
           agreementsCache[reminder.agreementId] = agreementTitle;
@@ -67,10 +73,12 @@ class ReminderViewService {
       if (obligationsCache.containsKey(reminder.obligationId)) {
         obligationTitle = obligationsCache[reminder.obligationId]!;
         // Note: caching clause ID here isn't done to keep it simple, we re-fetch if needed
-        final obligation = await obligationRepository.getObligationById(reminder.obligationId);
+        final obligation =
+            await obligationRepository.getObligationById(reminder.obligationId);
         clauseId = obligation?.sourceClauseId;
       } else {
-        final obligation = await obligationRepository.getObligationById(reminder.obligationId);
+        final obligation =
+            await obligationRepository.getObligationById(reminder.obligationId);
         if (obligation != null) {
           obligationTitle = obligation.title;
           clauseId = obligation.sourceClauseId;
@@ -99,33 +107,63 @@ class ReminderViewService {
       );
 
       final canAcknowledge = reminder.state == ReminderState.scheduled;
-      final canDismiss = reminder.state == ReminderState.scheduled || reminder.state == ReminderState.acknowledged;
-      final canComplete = reminder.state != ReminderState.completed && !reminder.state.isTerminal;
+      final canDismiss = reminder.state == ReminderState.scheduled ||
+          reminder.state == ReminderState.acknowledged;
+      final canComplete = reminder.state != ReminderState.completed &&
+          !reminder.state.isTerminal;
 
-      // Note: This relies on standard display formatting. We don't have a specific requirement 
+      // Note: This relies on standard display formatting. We don't have a specific requirement
       // on format so we just provide the ISO string or a simple representation.
       final displayTime = _formatLocal(reminder.dueAt, reminder.timezone);
 
-      viewModels.add(ReminderCardViewModel(
-        reminderId: reminder.id,
-        agreementId: reminder.agreementId,
-        agreementTitle: agreementTitle,
-        obligationId: reminder.obligationId,
-        obligationTitle: obligationTitle,
-        clauseReference: clauseReference,
-        dueAtUtc: reminder.dueAt,
-        timezone: reminder.timezone,
-        dueAtDisplay: displayTime,
-        reminderState: reminder.state,
-        temporalStatus: temporalStatus,
-        notificationStatus: reminder.notificationState,
-        canAcknowledge: canAcknowledge,
-        canDismiss: canDismiss,
-        canComplete: canComplete,
-      ),);
+      viewModels.add(
+        ReminderCardViewModel(
+          reminderId: reminder.id,
+          agreementId: reminder.agreementId,
+          agreementTitle: agreementTitle,
+          obligationId: reminder.obligationId,
+          obligationTitle: obligationTitle,
+          clauseReference: clauseReference,
+          dueAtUtc: reminder.dueAt,
+          timezone: reminder.timezone,
+          dueAtDisplay: displayTime,
+          reminderState: reminder.state,
+          temporalStatus: temporalStatus,
+          notificationStatus: reminder.notificationState,
+          canAcknowledge: canAcknowledge,
+          canDismiss: canDismiss,
+          canComplete: canComplete,
+        ),
+      );
     }
 
     return viewModels;
+  }
+
+  /// Transitions a scheduled reminder to acknowledged state.
+  Future<void> acknowledgeReminder(String reminderId) async {
+    await reminderRepository.transitionState(
+      reminderId: reminderId,
+      expectedCurrentState: ReminderState.scheduled,
+      targetState: ReminderState.acknowledged,
+      occurredAt: DateTime.now().toUtc(),
+    );
+  }
+
+  /// Transitions a scheduled or acknowledged reminder to dismissed state.
+  Future<void> dismissReminder(String reminderId) async {
+    final reminder = await reminderRepository.getById(reminderId);
+    if (reminder == null) return;
+
+    if (reminder.state == ReminderState.scheduled ||
+        reminder.state == ReminderState.acknowledged) {
+      await reminderRepository.transitionState(
+        reminderId: reminderId,
+        expectedCurrentState: reminder.state,
+        targetState: ReminderState.dismissed,
+        occurredAt: DateTime.now().toUtc(),
+      );
+    }
   }
 
   String _formatLocal(DateTime utc, String timezone) {

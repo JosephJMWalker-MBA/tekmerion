@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tekmerion/src/features/agreement/domain/agreement_repository.dart';
 import 'package:tekmerion/src/features/clause/domain/clause_repository.dart';
 import 'package:tekmerion/src/features/obligation/domain/obligation_repository.dart';
+import 'package:tekmerion/src/features/reminder/application/reminder_reconciliation_service.dart';
 import 'package:tekmerion/src/features/reminder/application/reminder_view_service.dart';
 import 'package:tekmerion/src/features/reminder/domain/notification_scheduling_state.dart';
 import 'package:tekmerion/src/features/reminder/domain/reminder_repository.dart';
@@ -24,32 +25,54 @@ class FakeReminderViewService extends ReminderViewService {
   List<ReminderCardViewModel> upcomingViewModels = [];
 
   @override
-  Future<List<ReminderCardViewModel>> getTodayViewModels(DateTime nowUtc, Duration gracePeriod) async {
+  Future<List<ReminderCardViewModel>> getTodayViewModels(
+      DateTime nowUtc, Duration gracePeriod) async {
     return todayViewModels;
   }
 
   @override
-  Future<List<ReminderCardViewModel>> getUpcomingViewModels(DateTime nowUtc, Duration gracePeriod, {int daysHorizon = 30}) async {
+  Future<List<ReminderCardViewModel>> getUpcomingViewModels(
+      DateTime nowUtc, Duration gracePeriod,
+      {int daysHorizon = 30}) async {
     return upcomingViewModels;
   }
 }
 
 // We just need a dummy implementation to pass to the constructor
 class DummyReminderRepository implements ReminderRepository {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
 class DummyAgreementRepository implements AgreementRepository {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
 class DummyObligationRepository implements ObligationRepository {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
 class DummyClauseRepository implements ClauseRepository {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class DummyReminderReconciliationService
+    implements ReminderReconciliationService {
+  @override
+  Future<ReconciliationResult> triggerReconciliation() async {
+    return const ReconciliationResult(ReconciliationResultType.completed);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
   late FakeReminderViewService viewService;
+  late DummyReminderReconciliationService reconciliationService;
 
   setUp(() {
     viewService = FakeReminderViewService(
@@ -58,6 +81,7 @@ void main() {
       obligationRepository: DummyObligationRepository(),
       clauseRepository: DummyClauseRepository(),
     );
+    reconciliationService = DummyReminderReconciliationService();
   });
 
   Widget buildTestWidget(Widget child) {
@@ -69,12 +93,15 @@ void main() {
   testWidgets('displays loading state and then empty state', (tester) async {
     viewService.todayViewModels = [];
 
-    await tester.pumpWidget(buildTestWidget(
-      TodayRemindersScreen(
-        viewService: viewService,
-        gracePeriod: const Duration(days: 1),
+    await tester.pumpWidget(
+      buildTestWidget(
+        TodayRemindersScreen(
+          viewService: viewService,
+          reconciliationService: reconciliationService,
+          gracePeriod: const Duration(days: 1),
+        ),
       ),
-    ),);
+    );
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
@@ -104,12 +131,15 @@ void main() {
       ),
     ];
 
-    await tester.pumpWidget(buildTestWidget(
-      TodayRemindersScreen(
-        viewService: viewService,
-        gracePeriod: const Duration(days: 1),
+    await tester.pumpWidget(
+      buildTestWidget(
+        TodayRemindersScreen(
+          viewService: viewService,
+          reconciliationService: reconciliationService,
+          gracePeriod: const Duration(days: 1),
+        ),
       ),
-    ),);
+    );
 
     await tester.pumpAndSettle();
 

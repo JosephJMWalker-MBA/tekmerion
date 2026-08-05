@@ -6,11 +6,11 @@ import 'package:timezone/timezone.dart' as tz;
 /// Pure presentation helper to determine a reminder's temporal status.
 class ReminderTemporalStatusResolver {
   /// Resolves the temporal display status of a reminder.
-  /// 
+  ///
   /// [reminder] The canonical reminder instance.
   /// [currentUtc] The current UTC instant (provided for testability and purity).
   /// [gracePeriod] The duration after dueAt before it is considered overdue.
-  /// 
+  ///
   /// Note: "today" is evaluated in the context of the reminder's original timezone.
   static ReminderTemporalStatus resolve({
     required ReminderInstance reminder,
@@ -27,7 +27,7 @@ class ReminderTemporalStatusResolver {
 
     // It is in scheduled state. Check due/overdue.
     final dueUtc = reminder.dueAt;
-    
+
     // Check if it's overdue
     if (currentUtc.isAfter(dueUtc.add(gracePeriod))) {
       return ReminderTemporalStatus.overdue;
@@ -44,12 +44,12 @@ class ReminderTemporalStatusResolver {
           currentLocal.day == dueLocal.day) {
         return ReminderTemporalStatus.dueToday;
       }
-      
-      // If it is due in the past but not overdue and not today, 
+
+      // If it is due in the past but not overdue and not today,
       // it means it was due yesterday (or earlier) but within grace period.
       // We will still categorize it as dueToday or overdue.
       if (currentUtc.isAfter(dueUtc)) {
-        return ReminderTemporalStatus.dueToday; 
+        return ReminderTemporalStatus.dueToday;
       }
     } catch (_) {
       // If timezone fails, fallback to UTC comparison

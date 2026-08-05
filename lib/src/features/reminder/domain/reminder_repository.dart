@@ -70,5 +70,6 @@ abstract class ReminderRepository {
   });
 
   /// Atomically applies a reconciliation plan.
-  Future<void> applyReconciliationPlan(ReconciliationPlan plan, DateTime appliedAt);
+  Future<void> applyReconciliationPlan(
+      ReconciliationPlan plan, DateTime appliedAt);
 }

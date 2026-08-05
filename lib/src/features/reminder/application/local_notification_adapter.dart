@@ -2,7 +2,6 @@ import 'package:tekmerion/src/features/reminder/domain/notification_permission_s
 import 'package:tekmerion/src/features/reminder/domain/notification_scheduling_state.dart';
 
 class NotificationScheduleRequest {
-
   const NotificationScheduleRequest({
     required this.notificationId,
     required this.reminderId,
@@ -28,7 +27,29 @@ class NotificationScheduleRequest {
 abstract class LocalNotificationAdapter {
   Future<NotificationPermissionState> inspectPermissionState();
   Future<NotificationPermissionState> requestPermission();
-  Future<NotificationSchedulingState> scheduleNotification(NotificationScheduleRequest request);
+  Future<NotificationSchedulingState> scheduleNotification(
+      NotificationScheduleRequest request);
   Future<void> cancelNotification(int notificationId);
   Future<void> cancelForObligation(String obligationId);
+}
+
+class DummyLocalNotificationAdapter implements LocalNotificationAdapter {
+  @override
+  Future<NotificationPermissionState> inspectPermissionState() async =>
+      NotificationPermissionState.granted;
+
+  @override
+  Future<NotificationPermissionState> requestPermission() async =>
+      NotificationPermissionState.granted;
+
+  @override
+  Future<NotificationSchedulingState> scheduleNotification(
+          NotificationScheduleRequest request) async =>
+      NotificationSchedulingState.scheduled;
+
+  @override
+  Future<void> cancelNotification(int notificationId) async {}
+
+  @override
+  Future<void> cancelForObligation(String obligationId) async {}
 }

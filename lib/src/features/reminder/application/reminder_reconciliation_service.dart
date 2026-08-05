@@ -15,14 +15,12 @@ enum ReconciliationResultType {
 }
 
 class ReconciliationResult {
-
   const ReconciliationResult(this.type, {this.errorMessage});
   final ReconciliationResultType type;
   final String? errorMessage;
 }
 
 class ReminderReconciliationService {
-
   ReminderReconciliationService({
     required this.repository,
     required this.planner,
@@ -32,7 +30,7 @@ class ReminderReconciliationService {
   final ReminderRepository repository;
   final ReminderReconciliationPlanner planner;
   final LocalNotificationAdapter notificationAdapter;
-  
+
   // A callback or interface to supply the fresh inputs would be injected here.
   // For the sake of the domain service without hardcoding missing obligation repos,
   // we take a provider function that yields the fresh inputs.
@@ -45,7 +43,8 @@ class ReminderReconciliationService {
   Future<ReconciliationResult> triggerReconciliation() async {
     if (_isReconciling) {
       _rerunRequested = true;
-      return const ReconciliationResult(ReconciliationResultType.joinedExistingRun);
+      return const ReconciliationResult(
+          ReconciliationResultType.joinedExistingRun);
     }
 
     _isReconciling = true;
@@ -53,7 +52,7 @@ class ReminderReconciliationService {
 
     try {
       final result = await _runSingleReconciliation();
-      
+
       // We must copy the rerun flag before setting _isReconciling to false
       // to avoid race conditions, though Dart is single-threaded async.
       final shouldRerun = _rerunRequested;
@@ -65,14 +64,16 @@ class ReminderReconciliationService {
         // It will acquire the lock itself.
         unawaited(triggerReconciliation());
         // Return a special status for the first run that it finished but a rerun was scheduled
-        return const ReconciliationResult(ReconciliationResultType.rerunScheduled);
+        return const ReconciliationResult(
+            ReconciliationResultType.rerunScheduled);
       }
 
       return result;
     } catch (e) {
       _isReconciling = false;
       _rerunRequested = false;
-      return ReconciliationResult(ReconciliationResultType.failed, errorMessage: e.toString());
+      return ReconciliationResult(ReconciliationResultType.failed,
+          errorMessage: e.toString());
     }
   }
 
@@ -102,12 +103,14 @@ class ReminderReconciliationService {
     // We process inserts and preserves that need scheduling.
     // Wait, preserves might also need scheduling if they failed previously or weren't scheduled yet.
     // The instructions say: "Eligible for scheduling: notificationState notRequested when permission is granted; failed when error policy permits retry".
-    final eligibleToSchedule = plan.inserts.followedBy(plan.preserves).where((op) {
+    final eligibleToSchedule =
+        plan.inserts.followedBy(plan.preserves).where((op) {
       if (op.localNotificationId == null) return false;
       final ns = op.reminder.notificationState;
       if (ns == NotificationSchedulingState.scheduled) return false;
-      
-      if (ns == NotificationSchedulingState.notRequested && permissionState == NotificationPermissionState.granted) {
+
+      if (ns == NotificationSchedulingState.notRequested &&
+          permissionState == NotificationPermissionState.granted) {
         return true;
       }
       if (ns == NotificationSchedulingState.failed) {
@@ -131,7 +134,8 @@ class ReminderReconciliationService {
             payloadData: {},
           );
 
-          final scheduleResult = await notificationAdapter.scheduleNotification(request);
+          final scheduleResult =
+              await notificationAdapter.scheduleNotification(request);
 
           if (scheduleResult == NotificationSchedulingState.scheduled) {
             await repository.markNotificationScheduled(
@@ -149,12 +153,14 @@ class ReminderReconciliationService {
           }
         } else {
           // If permission is denied/unavailable, we record that.
-          final resultingState = _mapPermissionToSchedulingState(permissionState);
+          final resultingState =
+              _mapPermissionToSchedulingState(permissionState);
           // Wait, the instructions say: "reconciliation never requests permission; notDetermined maps to notRequested".
           // "permission failure never changes ReminderState".
           // "denied maps to permissionDenied; unavailable maps to unavailable".
           // We can update the notification state.
-          await repository.markNotificationFailed( // we might need a general state update
+          await repository.markNotificationFailed(
+            // we might need a general state update
             reminderId: op.reminder.id,
             errorCode: resultingState.name,
             attemptedAt: appliedAt,
@@ -171,7 +177,9 @@ class ReminderReconciliationService {
     }
 
     // Handle Cancellations and Supersessions at the platform level
-    final eligibleToCancel = plan.cancels.followedBy(plan.supersedes).where((op) => op.localNotificationId != null);
+    final eligibleToCancel = plan.cancels
+        .followedBy(plan.supersedes)
+        .where((op) => op.localNotificationId != null);
     for (final op in eligibleToCancel) {
       try {
         await notificationAdapter.cancelNotification(op.localNotificationId!);
@@ -181,12 +189,14 @@ class ReminderReconciliationService {
     }
 
     if (hasDeliveryFailures) {
-      return const ReconciliationResult(ReconciliationResultType.completedWithDeliveryFailures);
+      return const ReconciliationResult(
+          ReconciliationResultType.completedWithDeliveryFailures);
     }
     return const ReconciliationResult(ReconciliationResultType.completed);
   }
 
-  NotificationSchedulingState _mapPermissionToSchedulingState(NotificationPermissionState permission) {
+  NotificationSchedulingState _mapPermissionToSchedulingState(
+      NotificationPermissionState permission) {
     switch (permission) {
       case NotificationPermissionState.notDetermined:
         return NotificationSchedulingState.notRequested;
@@ -202,7 +212,6 @@ class ReminderReconciliationService {
 }
 
 class ReconciliationInputs {
-
   const ReconciliationInputs({
     required this.persistedReminders,
     required this.candidateReminders,

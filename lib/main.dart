@@ -18,7 +18,10 @@ import 'src/features/agreement/data/sqlite_agreement_repository.dart';
 import 'src/features/agreement/presentation/file_picker_adapter.dart';
 import 'src/features/clause/data/sqlite_clause_repository.dart';
 import 'src/features/obligation/data/sqlite_obligation_repository.dart';
+import 'src/features/reminder/application/local_notification_adapter.dart';
+import 'src/features/reminder/application/reminder_reconciliation_service.dart';
 import 'src/features/reminder/application/reminder_view_service.dart';
+import 'src/features/reminder/domain/reminder_reconciliation_planner.dart';
 import 'src/features/reminder/infrastructure/sqlite_reminder_repository.dart';
 
 void main() async {
@@ -84,6 +87,23 @@ void main() async {
     clauseRepository: clauseRepository,
   );
 
+  final reminderReconciliationService = ReminderReconciliationService(
+    repository: reminderRepository,
+    planner: ReminderReconciliationPlanner(),
+    notificationAdapter: DummyLocalNotificationAdapter(),
+    inputsProvider: () async {
+      return ReconciliationInputs(
+        persistedReminders: [],
+        candidateReminders: [],
+        currentUtc: DateTime.now().toUtc(),
+        windowStartUtc: DateTime.now().toUtc(),
+        windowEndUtc: DateTime.now().toUtc().add(const Duration(days: 30)),
+        fulfilledObligationIds: {},
+        supersededScheduleRuleIds: {},
+      );
+    },
+  );
+
   runApp(
     TekmerionApp(
       importService: importService,
@@ -96,6 +116,7 @@ void main() async {
       exportPackageRepository: exportPackageRepository,
       exportShareAdapter: exportShareAdapter,
       reminderViewService: reminderViewService,
+      reminderReconciliationService: reminderReconciliationService,
     ),
   );
 }

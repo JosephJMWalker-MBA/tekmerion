@@ -62,7 +62,8 @@ Future<void> runBenchmark(
   debugPrint('  Result: SUCCESS');
   debugPrint('  Total Time: ${stopwatch.elapsedMilliseconds} ms');
   debugPrint(
-      '  ZIP Size: ${(sizeBytes / (1024 * 1024)).toStringAsFixed(2)} MB',);
+    '  ZIP Size: ${(sizeBytes / (1024 * 1024)).toStringAsFixed(2)} MB',
+  );
   debugPrint(
     '  Peak RSS (approx): ${(maxRss / (1024 * 1024)).toStringAsFixed(2)} MB',
   );

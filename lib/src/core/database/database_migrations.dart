@@ -75,8 +75,12 @@ class DatabaseMigrations {
           await db.execute('PRAGMA foreign_keys = OFF');
 
           // Create the new full reminders table
-          await db.execute(DatabaseSchema.createRemindersTable.replaceAll(
-              'CREATE TABLE reminders', 'CREATE TABLE reminders_new',),);
+          await db.execute(
+            DatabaseSchema.createRemindersTable.replaceAll(
+              'CREATE TABLE reminders',
+              'CREATE TABLE reminders_new',
+            ),
+          );
 
           // Ensure synthetic rules exist for legacy reminders without a rule
           await db.execute('''

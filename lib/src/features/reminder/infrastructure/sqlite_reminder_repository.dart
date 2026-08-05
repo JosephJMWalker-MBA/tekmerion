@@ -5,11 +5,18 @@ import 'package:tekmerion/src/features/reminder/domain/reminder_instance.dart';
 import 'package:tekmerion/src/features/reminder/domain/reminder_repository.dart';
 import 'package:tekmerion/src/features/reminder/domain/reminder_state.dart';
 
+typedef UtcNow = DateTime Function();
+
 class SqliteReminderRepository implements ReminderRepository {
-  SqliteReminderRepository(this._databaseFactory, this._dbPath);
+  SqliteReminderRepository(
+    this._databaseFactory,
+    this._dbPath, {
+    UtcNow? nowUtc,
+  }) : _nowUtc = nowUtc ?? (() => DateTime.now().toUtc());
 
   final Future<Database> Function(String path) _databaseFactory;
   final String _dbPath;
+  final UtcNow _nowUtc;
 
   Future<Database> _getDb() => _databaseFactory(_dbPath);
 
@@ -91,7 +98,8 @@ class SqliteReminderRepository implements ReminderRepository {
 
   @override
   Future<List<ReminderInstance>> getForScheduleRule(
-      String scheduleRuleId,) async {
+    String scheduleRuleId,
+  ) async {
     final db = await _getDb();
     final results = await db.query(
       'reminders',
@@ -183,7 +191,8 @@ class SqliteReminderRepository implements ReminderRepository {
 
     if (count == 0) {
       throw StateError(
-          'Invalid state transition from ${expectedCurrentState.name} to ${targetState.name} for reminder $reminderId',);
+        'Invalid state transition from ${expectedCurrentState.name} to ${targetState.name} for reminder $reminderId',
+      );
     }
   }
 
@@ -200,7 +209,7 @@ class SqliteReminderRepository implements ReminderRepository {
         'notification_state': NotificationSchedulingState.scheduled.name,
         'local_notification_id': localNotificationId,
         'notification_scheduled_at': scheduledAt.toUtc().toIso8601String(),
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
+        'updated_at': _nowUtc().toIso8601String(),
       },
       where: 'id = ?',
       whereArgs: [reminderId],
@@ -220,7 +229,7 @@ class SqliteReminderRepository implements ReminderRepository {
         'notification_state': NotificationSchedulingState.failed.name,
         'notification_error_code': errorCode,
         'notification_attempted_at': attemptedAt.toUtc().toIso8601String(),
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
+        'updated_at': _nowUtc().toIso8601String(),
       },
       where: 'id = ?',
       whereArgs: [reminderId],
@@ -239,7 +248,7 @@ class SqliteReminderRepository implements ReminderRepository {
       {
         'state': ReminderState.superseded.name,
         'superseded_at': supersededAt.toUtc().toIso8601String(),
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
+        'updated_at': _nowUtc().toIso8601String(),
       },
       where:
           'schedule_rule_id = ? AND generation_version < ? AND state IN (?, ?)',
@@ -263,7 +272,7 @@ class SqliteReminderRepository implements ReminderRepository {
       {
         'state': ReminderState.cancelled.name,
         'cancelled_at': cancelledAt.toUtc().toIso8601String(),
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
+        'updated_at': _nowUtc().toIso8601String(),
       },
       where: 'obligation_id = ? AND state IN (?, ?)',
       whereArgs: [

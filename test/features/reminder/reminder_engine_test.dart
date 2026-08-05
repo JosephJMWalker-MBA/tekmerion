@@ -127,8 +127,13 @@ void main() {
         obligationId: 'ob_1',
         ruleType: ScheduleRuleType.oneTime,
         timezone: 'America/New_York', // EST
-        startAt: DateTime.utc(2026, 2, 1, 9,
-            0,), // Local time expressed as UTC component by the app
+        startAt: DateTime.utc(
+          2026,
+          2,
+          1,
+          9,
+          0,
+        ), // Local time expressed as UTC component by the app
         leadTimeSeconds: 0,
         gracePeriodSeconds: 0,
         confirmedAt: now,
@@ -253,8 +258,10 @@ void main() {
 
       expect(candidates.length, 3);
       expect(candidates[0].dueAt, DateTime.utc(2024, 1, 31, 9, 0));
-      expect(candidates[1].dueAt,
-          DateTime.utc(2024, 2, 29, 9, 0),); // Leap year clamp
+      expect(
+        candidates[1].dueAt,
+        DateTime.utc(2024, 2, 29, 9, 0),
+      ); // Leap year clamp
       expect(candidates[2].dueAt, DateTime.utc(2024, 3, 31, 9, 0));
     });
 

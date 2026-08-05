@@ -44,13 +44,14 @@ class ReminderEngine {
     // However, the test suite says "Local time expressed as UTC component by the app",
     // meaning the components (year, month, day, hour, minute) of startAt represent local time.
     final localStart = tz.TZDateTime(
-        location,
-        rule.startAt.year,
-        rule.startAt.month,
-        rule.startAt.day,
-        rule.startAt.hour,
-        rule.startAt.minute,
-        rule.startAt.second,);
+      location,
+      rule.startAt.year,
+      rule.startAt.month,
+      rule.startAt.day,
+      rule.startAt.hour,
+      rule.startAt.minute,
+      rule.startAt.second,
+    );
 
     if (rule.ruleType == ScheduleRuleType.oneTime) {
       occurrences.add(localStart);
@@ -76,8 +77,15 @@ class ReminderEngine {
           nextDay = daysInNextMonth;
         }
 
-        current = tz.TZDateTime(location, nextYear, nextMonth, nextDay,
-            localStart.hour, localStart.minute, localStart.second,);
+        current = tz.TZDateTime(
+          location,
+          nextYear,
+          nextMonth,
+          nextDay,
+          localStart.hour,
+          localStart.minute,
+          localStart.second,
+        );
       }
     } else if (rule.ruleType == ScheduleRuleType.intervalDays) {
       final intervalDays = int.tryParse(rule.recurrenceExpression ?? '1') ?? 1;
@@ -99,8 +107,9 @@ class ReminderEngine {
     for (final occLocal in occurrences) {
       // Ensure we get a standard core DateTime in UTC, not a TZDateTime.
       final occUtc = DateTime.fromMillisecondsSinceEpoch(
-          occLocal.millisecondsSinceEpoch,
-          isUtc: true,);
+        occLocal.millisecondsSinceEpoch,
+        isUtc: true,
+      );
 
       if (occUtc.isBefore(windowStart)) {
         continue;
@@ -139,7 +148,10 @@ class ReminderEngine {
   }
 
   static String _generateOccurrenceKey(
-      String scheduleRuleId, DateTime dueAtUtc, int generationVersion,) {
+    String scheduleRuleId,
+    DateTime dueAtUtc,
+    int generationVersion,
+  ) {
     final payload =
         '$scheduleRuleId|${dueAtUtc.toIso8601String()}|$generationVersion';
     final bytes = utf8.encode(payload);

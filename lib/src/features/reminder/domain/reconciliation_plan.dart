@@ -18,7 +18,6 @@ enum ReconciliationReasonCode {
 }
 
 class ReconciliationOperation {
-
   const ReconciliationOperation({
     required this.reminder,
     required this.type,
@@ -28,7 +27,7 @@ class ReconciliationOperation {
   final ReminderInstance reminder;
   final ReconciliationOperationType type;
   final ReconciliationReasonCode reason;
-  
+
   /// The local notification ID that should be used if scheduling this reminder, or
   /// null if it is not applicable (e.g. cancelled/superseded). For preserve and leaveHistoricalUnchanged,
   /// this should match the persisted id.
@@ -36,7 +35,6 @@ class ReconciliationOperation {
 }
 
 class ReconciliationPlan {
-
   const ReconciliationPlan(this.operations);
   final List<ReconciliationOperation> operations;
 
@@ -46,12 +44,12 @@ class ReconciliationPlan {
   Iterable<ReconciliationOperation> get preserves =>
       operations.where((op) => op.type == ReconciliationOperationType.preserve);
 
-  Iterable<ReconciliationOperation> get supersedes =>
-      operations.where((op) => op.type == ReconciliationOperationType.supersede);
+  Iterable<ReconciliationOperation> get supersedes => operations
+      .where((op) => op.type == ReconciliationOperationType.supersede);
 
   Iterable<ReconciliationOperation> get cancels =>
       operations.where((op) => op.type == ReconciliationOperationType.cancel);
 
-  Iterable<ReconciliationOperation> get historicalUnchanged =>
-      operations.where((op) => op.type == ReconciliationOperationType.leaveHistoricalUnchanged);
+  Iterable<ReconciliationOperation> get historicalUnchanged => operations.where(
+      (op) => op.type == ReconciliationOperationType.leaveHistoricalUnchanged);
 }

@@ -8,6 +8,8 @@ import 'package:tekmerion/src/features/export/presentation/record_package_export
 import 'package:tekmerion/src/features/obligation/domain/obligation_repository.dart';
 import 'package:tekmerion/src/features/obligation/presentation/obligations_list_screen.dart';
 import 'package:tekmerion/src/features/record/application/complete_obligation_service.dart';
+import 'package:tekmerion/src/features/record/presentation/complete_obligation_screen.dart';
+import 'package:tekmerion/src/features/reminder/application/reminder_reconciliation_service.dart';
 import 'package:tekmerion/src/features/reminder/application/reminder_view_service.dart';
 import 'package:tekmerion/src/features/reminder/presentation/screens/today_reminders_screen.dart';
 import 'package:tekmerion/src/features/reminder/presentation/screens/upcoming_reminders_screen.dart';
@@ -39,6 +41,7 @@ class AgreementHomeScreen extends StatefulWidget {
     required this.exportPackageRepository,
     required this.exportShareAdapter,
     required this.reminderViewService,
+    required this.reminderReconciliationService,
   });
 
   final AgreementImportService importService;
@@ -51,6 +54,7 @@ class AgreementHomeScreen extends StatefulWidget {
   final ExportPackageRepository exportPackageRepository;
   final ExportShareAdapter exportShareAdapter;
   final ReminderViewService reminderViewService;
+  final ReminderReconciliationService reminderReconciliationService;
 
   @override
   State<AgreementHomeScreen> createState() => _AgreementHomeScreenState();
@@ -293,7 +297,30 @@ class _AgreementHomeScreenState extends State<AgreementHomeScreen> {
                       MaterialPageRoute<void>(
                         builder: (_) => TodayRemindersScreen(
                           viewService: widget.reminderViewService,
+                          reconciliationService:
+                              widget.reminderReconciliationService,
                           gracePeriod: const Duration(days: 1),
+                          onComplete: (vm) async {
+                            final obligation = await widget.obligationRepository
+                                .getObligationById(vm.obligationId);
+                            if (obligation == null) return;
+                            if (context.mounted) {
+                              Navigator.of(context)
+                                  .push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => CompleteObligationScreen(
+                                    obligation: obligation,
+                                    agreementVersionId: _result!.version.id,
+                                    service: widget.completeObligationService,
+                                  ),
+                                ),
+                              )
+                                  .then((_) {
+                                // Trigger reconciliation upon return, but the screen does it automatically via future
+                                // Note: TodayRemindersScreen will reload on pop due to the then() on Navigator
+                              });
+                            }
+                          },
                         ),
                       ),
                     );
@@ -308,8 +335,26 @@ class _AgreementHomeScreenState extends State<AgreementHomeScreen> {
                       MaterialPageRoute<void>(
                         builder: (_) => UpcomingRemindersScreen(
                           viewService: widget.reminderViewService,
+                          reconciliationService:
+                              widget.reminderReconciliationService,
                           gracePeriod: const Duration(days: 1),
                           daysHorizon: 30,
+                          onComplete: (vm) async {
+                            final obligation = await widget.obligationRepository
+                                .getObligationById(vm.obligationId);
+                            if (obligation == null) return;
+                            if (context.mounted) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => CompleteObligationScreen(
+                                    obligation: obligation,
+                                    agreementVersionId: _result!.version.id,
+                                    service: widget.completeObligationService,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
                         ),
                       ),
                     );

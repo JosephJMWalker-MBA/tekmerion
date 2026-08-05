@@ -16,16 +16,17 @@ void main() {
       expect(id1, isNot(id2));
     });
 
-    test('forced collision resolves deterministically with attempt counter', () {
+    test('forced collision resolves deterministically with attempt counter',
+        () {
       final key = 'forced-collision-test';
       final id0 = NotificationIdGenerator.generateId(key, attempt: 0);
       final id1 = NotificationIdGenerator.generateId(key, attempt: 1);
       final id2 = NotificationIdGenerator.generateId(key, attempt: 2);
-      
+
       expect(id0, isNot(id1));
       expect(id0, isNot(id2));
       expect(id1, isNot(id2));
-      
+
       // Attempt 1 should always produce the same ID
       final id1Again = NotificationIdGenerator.generateId(key, attempt: 1);
       expect(id1, id1Again);
