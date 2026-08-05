@@ -70,8 +70,10 @@ class FakeRecordRepository implements RecordRepository {
 }
 
 class FakeTimelineRepository implements TimelineRepository {
+  List<TimelineEvent> events = [];
   @override
-  Future<List<TimelineEvent>> getTimelineForAgreement(String id) async => [];
+  Future<List<TimelineEvent>> getTimelineForAgreement(String id) async =>
+      events;
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -125,7 +127,7 @@ void main() {
     final originalHash = sha256.convert(agreementBytes).toString();
 
     final agreement = Agreement(
-      id: 'a1',
+      id: '11111111-1111-1111-1111-111111111111',
       title: 'Lease',
       agreementType: 'lease',
       status: AgreementStatus.active,
@@ -133,23 +135,23 @@ void main() {
     );
 
     final version = AgreementVersion(
-      id: 'v1',
-      agreementId: 'a1',
-      sourceEvidenceAssetId: 'ev1',
+      id: '22222222-2222-2222-2222-222222222222',
+      agreementId: '11111111-1111-1111-1111-111111111111',
+      sourceEvidenceAssetId: '66666666-6666-6666-6666-666666666661',
       versionLabel: 'Original',
       status: AgreementVersionStatus.active,
       importedAt: DateTime.now(),
     );
 
     final evidenceEnvelope = EvidenceEnvelope(
-      evidenceId: 'ev1',
+      evidenceId: '66666666-6666-6666-6666-666666666661',
       originalFilename: 'lease.pdf',
       mimeType: 'application/pdf',
       byteSize: agreementBytes.length,
       sha256: originalHash,
       captureMethod: EvidenceCaptureMethod.externalImport,
       ingestedAt: DateTime.now(),
-      storageIdentifier: 'ev1',
+      storageIdentifier: '66666666-6666-6666-6666-666666666661',
       assetRole: EvidenceAssetRole.original,
     );
 
@@ -157,18 +159,21 @@ void main() {
       agreementRepo: FakeAgreementRepository(
         [agreement],
         [version],
-        {'ev1': evidenceEnvelope},
+        {'66666666-6666-6666-6666-666666666661': evidenceEnvelope},
       ),
       clauseRepo: FakeClauseRepository(),
       obligationRepo: FakeObligationRepository(),
       recordRepo: FakeRecordRepository(),
       timelineRepo: FakeTimelineRepository(),
-      evidenceStorage: FakeEvidenceStorage({'ev1': agreementBytes}),
+      evidenceStorage: FakeEvidenceStorage(
+          {'66666666-6666-6666-6666-666666666661': agreementBytes}),
       exportRepo: FakeExportPackageRepository(),
       pdfGenerator: FakeRecordPdfGenerator(),
     );
 
-    final statuses = await service.generateCompleteExport('a1').toList();
+    final statuses = await service
+        .generateCompleteExport('11111111-1111-1111-1111-111111111111')
+        .toList();
     if (statuses.last.state == ExportState.failed) {
       // ignore: avoid_print
     }

@@ -16,7 +16,7 @@ void main() {
 
     // Insert dummy agreement
     await db.insert('agreements', {
-      'id': 'a1',
+      'id': '11111111-1111-1111-1111-111111111111',
       'title': 'Test Agreement',
       'agreement_type': 'lease',
       'status': 'active',
@@ -32,8 +32,8 @@ void main() {
     test('inserts and retrieves export package exactly', () async {
       final generatedAt = DateTime.utc(2026, 8, 4, 12, 0, 0);
       final package = ExportPackage(
-        id: 'pkg1',
-        agreementId: 'a1',
+        id: '77777777-7777-7777-7777-777777777777',
+        agreementId: '11111111-1111-1111-1111-111111111111',
         generatedAt: generatedAt,
         format: 'zip',
         filterParametersJson: '{}',
@@ -45,10 +45,11 @@ void main() {
       );
 
       await repo.insertExportPackage(package);
-      final retrieved = await repo.getPackagesForAgreement('a1');
+      final retrieved = await repo
+          .getPackagesForAgreement('11111111-1111-1111-1111-111111111111');
 
       expect(retrieved.length, 1);
-      expect(retrieved.first.id, 'pkg1');
+      expect(retrieved.first.id, '77777777-7777-7777-7777-777777777777');
       expect(retrieved.first.manifestSha256, 'deadbeef');
       expect(retrieved.first.generatedAt, generatedAt);
     });
