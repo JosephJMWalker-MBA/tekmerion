@@ -157,9 +157,11 @@ class _UpcomingRemindersScreenState extends State<UpcomingRemindersScreen> {
                     final vm = viewModels[index];
                     return ReminderCard(
                       viewModel: vm,
-                      onAcknowledge:
-                          vm.canAcknowledge ? () => _handleAcknowledge(vm) : null,
-                      onDismiss: vm.canDismiss ? () => _handleDismiss(vm) : null,
+                      onAcknowledge: vm.canAcknowledge
+                          ? () => _handleAcknowledge(vm)
+                          : null,
+                      onDismiss:
+                          vm.canDismiss ? () => _handleDismiss(vm) : null,
                       onComplete: vm.canComplete
                           ? () {
                               _handleComplete(vm);
@@ -176,4 +178,3 @@ class _UpcomingRemindersScreenState extends State<UpcomingRemindersScreen> {
     );
   }
 }
-

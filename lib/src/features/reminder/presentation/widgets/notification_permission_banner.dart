@@ -91,7 +91,8 @@ class _NotificationPermissionBannerState
             if (showAction)
               TextButton(
                 onPressed: _requestPermission,
-                child: const Text('Enable device notifications', textAlign: TextAlign.center),
+                child: const Text('Enable device notifications',
+                    textAlign: TextAlign.center),
               ),
           ],
         ),

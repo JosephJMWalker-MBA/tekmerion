@@ -39,7 +39,7 @@ class FlutterLocalNotificationAdapter implements LocalNotificationAdapter {
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
-    
+
     if (result == null) {
       return NotificationPermissionState.unavailable;
     } else if (result) {
@@ -59,8 +59,9 @@ class FlutterLocalNotificationAdapter implements LocalNotificationAdapter {
       }
 
       final location = tz.getLocation(request.timezoneIdentifier);
-      final scheduledDate = tz.TZDateTime.from(request.scheduledUtcInstant, location);
-      
+      final scheduledDate =
+          tz.TZDateTime.from(request.scheduledUtcInstant, location);
+
       final payloadStr = jsonEncode(request.payloadData);
 
       await _plugin.zonedSchedule(

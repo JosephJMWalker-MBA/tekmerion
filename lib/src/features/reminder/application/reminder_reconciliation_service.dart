@@ -141,7 +141,11 @@ class ReminderReconciliationService {
             timezoneIdentifier: op.reminder.timezone,
             title: op.reminder.title,
             body: op.reminder.body,
-            payloadData: {},
+            payloadData: {
+              'reminderId': op.reminder.id,
+              'agreementId': op.reminder.agreementId,
+              'obligationId': op.reminder.obligationId,
+            },
           );
 
           final scheduleResult =

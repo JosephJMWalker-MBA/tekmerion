@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tekmerion/src/features/reminder/application/local_notification_adapter.dart';
@@ -13,7 +12,8 @@ class FakeAndroidPlugin implements AndroidFlutterLocalNotificationsPlugin {
   bool? requestNotificationsPermissionResult = true;
 
   @override
-  Future<bool?> areNotificationsEnabled() async => areNotificationsEnabledResult;
+  Future<bool?> areNotificationsEnabled() async =>
+      areNotificationsEnabledResult;
 
   @override
   Future<bool?> requestNotificationsPermission() async =>
@@ -113,7 +113,8 @@ void main() {
         reminderId: 'r1',
         agreementId: 'a1',
         obligationId: 'o1',
-        scheduledUtcInstant: DateTime.now().toUtc().subtract(const Duration(hours: 1)),
+        scheduledUtcInstant:
+            DateTime.now().toUtc().subtract(const Duration(hours: 1)),
         timezoneIdentifier: 'UTC',
         title: 'Title',
         body: 'Body',
@@ -130,7 +131,8 @@ void main() {
         reminderId: 'r1',
         agreementId: 'a1',
         obligationId: 'o1',
-        scheduledUtcInstant: DateTime.now().toUtc().add(const Duration(hours: 1)),
+        scheduledUtcInstant:
+            DateTime.now().toUtc().add(const Duration(hours: 1)),
         timezoneIdentifier: 'UTC',
         title: 'Title',
         body: 'Body',
@@ -148,7 +150,8 @@ void main() {
         reminderId: 'r1',
         agreementId: 'a1',
         obligationId: 'o1',
-        scheduledUtcInstant: DateTime.now().toUtc().add(const Duration(hours: 1)),
+        scheduledUtcInstant:
+            DateTime.now().toUtc().add(const Duration(hours: 1)),
         timezoneIdentifier: 'UTC',
         title: 'Title',
         body: 'Body',
@@ -166,8 +169,10 @@ void main() {
 
     test('cancelForObligation cancels matching requests', () async {
       plugin.pending = [
-        const PendingNotificationRequest(1, 'A', 'B', '{"obligationId": "target"}'),
-        const PendingNotificationRequest(2, 'A', 'B', '{"obligationId": "other"}'),
+        const PendingNotificationRequest(
+            1, 'A', 'B', '{"obligationId": "target"}'),
+        const PendingNotificationRequest(
+            2, 'A', 'B', '{"obligationId": "other"}'),
       ];
 
       await adapter.cancelForObligation('target');

@@ -102,7 +102,8 @@ void main() async {
   final reminderReconciliationService = ReminderReconciliationService(
     repository: reminderRepository,
     planner: ReminderReconciliationPlanner(),
-    notificationAdapter: FlutterLocalNotificationAdapter(flutterLocalNotificationsPlugin),
+    notificationAdapter:
+        FlutterLocalNotificationAdapter(flutterLocalNotificationsPlugin),
     inputsProvider: () async {
       return ReconciliationInputs(
         persistedReminders: [],
