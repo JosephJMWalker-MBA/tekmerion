@@ -69,7 +69,17 @@ We will adopt a pure, functional approach to reminder candidate generation.
 
 We have adopted `flutter_local_notifications` for OS-level integration.
 
-1. **Exact-Alarm Policy**: We use inexact scheduling (`ScheduleMode.inexactAllowWhileIdle` or `ScheduleMode.inexact`) exclusively. We do NOT request `SCHEDULE_EXACT_ALARM` or `USE_EXACT_ALARM` to avoid Play Store restrictions and battery-drain penalties. Android battery-saving policies (Doze mode, OEM restrictions) may delay delivery. Canonical reminder due dates remain preserved securely inside Tekmerion and are unaffected by delayed OS notifications.
-2. **Channel Configuration**: Notifications are sent via channel `tekmerion_reminders_v1` (Name: "Agreement reminders").
-3. **Permissions**: We target Android 13+ requiring `POST_NOTIFICATIONS`. The app never prompts for permissions automatically on startup or reconciliation. It waits for contextual user intent.
-4. **Resilience**: The manifest declares `RECEIVE_BOOT_COMPLETED` and the plugin's reboot receivers so OS reboots can attempt automatic rescheduling.
+7. **Android Integration Details**:
+   - **Plugin version**: flutter_local_notifications ^22.2.0
+   - **Channel ID/name/description**: tekmerion_reminders_v1 / Reminders / Notifications for upcoming obligations.
+   - **Scheduling mode**: AndroidScheduleMode.inexactAllowWhileIdle
+   - **Permissions**: POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED
+   - **Receivers**: ScheduledNotificationReceiver, ScheduledNotificationBootReceiver
+   - **Tested Android versions**: Manual tests deferred (API 24-34 intended).
+   - **Delivery drift**: Not manually recorded.
+   - **Reboot behavior**: Boot receiver present; unverified manually.
+   - **Tap-routing behavior**: Payload routed by obligationId; unverified manually.
+   - **Cancellation behavior**: cancel(id) and cancelForObligation implemented; unverified manually.
+   - **Known limitations**: Android Doze mode may delay inexact alarms. Manual verification of Android 13+ permission flows, tap routing, and reboot survival has not been performed on physical devices or emulators by the AI.
+
+A device notification is a delivery attempt, not proof that the user saw the reminder.

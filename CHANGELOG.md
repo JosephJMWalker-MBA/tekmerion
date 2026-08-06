@@ -65,3 +65,9 @@
 - Implemented and tested: UI integration for triggering export, handling stream lifecycles, and invoking native share intents.
 - Implemented and tested: Large-file benchmarking
 - Operating Limit: Advisory warning only (macOS generation takes ~2.5s for 100MB, peak RSS ~380MB).
+
+- **Phase 1J-E: Android Local Notification Integration**
+- Implemented and tested: `FlutterLocalNotificationAdapter` relying on inexact alarms (`AndroidScheduleMode.inexactAllowWhileIdle`).
+- Implemented and tested: `NotificationPermissionBanner` for requesting contextual `POST_NOTIFICATIONS` permissions.
+- Implemented and tested: Notification scheduling boundaries and OS adapters cleanly decoupled from canonical state.
+- Deferred: Android physical device verification (permission flows, tap routing, and delivery drift).

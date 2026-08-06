@@ -61,25 +61,25 @@
 - **Phase 1I:** Record Package Export (IMPLEMENTATION AND FUNCTIONAL AUDIT CHECKPOINT)
 
 ## Phase 1J Status
-- **Phase 1J-A & 1J-B:** Deterministic Reminder Engine & Persistence (IMPLEMENTED)
+- **Phase 1J:** Reminder Engine (IMPLEMENTED AND AUTOMATED-TESTED; ANDROID MANUAL VERIFICATION INCOMPLETE)
 
 **Implemented and tested:**
-- pure deterministic ReminderEngine
-- ReminderInstance persistence
-- non-destructive v4-to-v5 migration
-- derived due status
-- occurrence identity
-- guarded state transitions
-- notification-state separation
+- Pure deterministic `ReminderEngine` and `ReminderInstance` persistence (v4-to-v5 migration)
+- Derived due status, occurrence identity, and guarded state transitions
+- Notification-state separation
+- Pure `ReminderReconciliationPlanner` and collision-resilient `NotificationIdGenerator`
+- `ReminderReconciliationService` with single-flight coalescing concurrency
+- Atomic canonical transaction execution of `ReconciliationPlan`
+- `ReminderTemporalStatusResolver` and `ReminderViewService`
+- `TodayRemindersScreen` and `UpcomingRemindersScreen` providing filtered actionable views
+- `FlutterLocalNotificationAdapter` relying on inexact alarms (`AndroidScheduleMode.inexactAllowWhileIdle`)
+- `NotificationPermissionBanner` for requesting contextual Android 13+ permissions
 
 **Deferred:**
-- reconciliation
-- operating-system notification scheduling
-- Today and Upcoming UI
-- Android manual verification
+- Android manual verification (physical device/emulator tests for permission flows, tap routing, and delivery drift).
 
 ## Current Phase
-- **Phase 1J:** Reminder Engine (Reconciliation)
+- **End of Phase 1**
 
 ## Phase 1I Implementation and Functional Audit Checkpoint
 
